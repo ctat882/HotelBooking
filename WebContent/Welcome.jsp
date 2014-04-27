@@ -4,9 +4,15 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Welcome</title>
 </head>
 <body>
+Something here about the hotel chain...
+
+Check in date.
+Check out date.
+Num rooms.
+Max price per room.
 
 </body>
 </html>
