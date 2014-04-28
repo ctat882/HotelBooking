@@ -26,17 +26,25 @@ CREATE TABLE Rooms (
 
 -- Booking Table
 CREATE TABLE Bookings (
-	hotel			INTEGER UNIQUE, 
-	room_num		INTEGER UNIQUE,
-	booked_for		DATE,
+	booking_id		INTEGER GENERATED ALWAYS AS IDENTITY,
+	hotel			INTEGER, 
+	check_in		DATE NOT NULL,
+	check_out		DATE NOT NULL,
+	type			VARCHAR(20) NOT NULL,
+	quantity		INTEGER NOT NULL,
+	pin				INTEGER NOT NULL,
+	url				VARCHAR(30) NOT NULL,
 	extra_bed		INTEGER DEFAULT 0,
+	
 	-- Constraints
 	CONSTRAINT extra_bed_ck CHECK (extra_bed IN (0,1)),
+	
+	CONSTRAINT pin_ck CHECK (pin > 999 AND pin <= 9999),
 	-- because the single rooms are numbered 1 - 15, can check that single room
 	-- cannot have extra bed
 	--CONSTRAINT single_extra_ck CHECK(room_num < 16 AND extra_bed NOT IN (1));
 	-- Keys
-	FOREIGN KEY (room_num,hotel) REFERENCES Rooms(room_num,hotel),
-	PRIMARY KEY(hotel,room_num,booked_for)
+	FOREIGN KEY (hotel) REFERENCES Hotels(id),
+	PRIMARY KEY(booking_id)
 );
 
