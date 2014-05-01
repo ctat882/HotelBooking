@@ -6,7 +6,7 @@ CREATE SCHEMA "USER";
 CREATE TABLE Hotels (
 	id				INTEGER GENERATED ALWAYS AS IDENTITY,
 	city			VARCHAR(20),
-	
+
 	PRIMARY KEY (id)
 );
 
@@ -16,7 +16,9 @@ CREATE TABLE Rooms (
 	hotel			INTEGER,
 	size			VARCHAR(20) NOT NULL,
 	price			DECIMAL(5,2) NOT NULL,
+	availability	VARCHAR(20) NOT NULL DEFAULT 'Available',
 	-- Constraints
+	CONSTRAINT availability_ck CHECK (availability IN ('Occupied', 'Maintenance', 'Available')),
 	CONSTRAINT size_ck CHECK (size IN ('Single', 'Twin', 'Queen', 'Executive', 'Suite')),
 	CONSTRAINT price_ck CHECK (price IN (70.00,120.00,180.00,300.00)),
 	-- Keys
@@ -30,15 +32,15 @@ CREATE TABLE Bookings (
 	hotel			INTEGER, 
 	check_in		DATE NOT NULL,
 	check_out		DATE NOT NULL,
-	type			VARCHAR(20) NOT NULL,
+	size			VARCHAR(20) NOT NULL,
 	quantity		INTEGER NOT NULL,
 	pin				INTEGER NOT NULL,
 	url				VARCHAR(30) NOT NULL,
 	extra_bed		INTEGER DEFAULT 0,
-	
-	-- Constraints
-	CONSTRAINT extra_bed_ck CHECK (extra_bed IN (0,1)),
-	
+
+	-- Constraints	
+	CONSTRAINT booking_size_ck CHECK (size IN ('Single', 'Twin', 'Queen', 'Executive', 'Suite')),
+	CONSTRAINT extra_bed_ck CHECK (extra_bed IN (0,1)),	
 	CONSTRAINT pin_ck CHECK (pin > 999 AND pin <= 9999),
 	-- because the single rooms are numbered 1 - 15, can check that single room
 	-- cannot have extra bed
@@ -47,4 +49,3 @@ CREATE TABLE Bookings (
 	FOREIGN KEY (hotel) REFERENCES Hotels(id),
 	PRIMARY KEY(booking_id)
 );
-
