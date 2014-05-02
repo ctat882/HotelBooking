@@ -146,7 +146,7 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 					System.out.println("there are " + noOccupied + "Suite occupied rooms");
 				}
 				
-				// Get 'Available' 'Executive' Room amount
+				// Get 'Available' 'Suite' Room amount
 				String query_SuiteAvailable = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Suite' AND AVAILABILITY = 'Available'" ;
 				res = stmnt.executeQuery(query_SuiteAvailable);
 				if (res.next()){
