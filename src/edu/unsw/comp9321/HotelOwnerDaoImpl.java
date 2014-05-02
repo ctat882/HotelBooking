@@ -48,49 +48,28 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 				// get 'Occupied' and 'Available' amounts for each type of Room ('Single', 'Twin', 'Queen', 'Executive' and 'Suite')			
 				
 				// Get Hotel Location
-				HotelLoc = getHotelLoc(hotelID);					
-				System.out.println("Hotel Loc: " + HotelLoc);
+				HotelLoc = getHotelLoc(hotelID);			
+				
 				/*******************************************  SINGLE ROOMS  *****************************************************/
 				
 				// Get 'Occupied' 'Single' Room amount
-				String query_SingleOccupied = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Single' AND AVAILABILITY = 'Occupied'" ;
-				res = stmnt.executeQuery(query_SingleOccupied);
-				if (res.next()){
-					noOccupied = res.getInt(1);					
-					System.out.println("there are " + noOccupied + "single occupied rooms");
-				}
+				noOccupied = getRoomAvailability(hotelID, "Single", "Occupied");		
+				
 			
 				// Get 'Available' 'Single' Room amount 
-				String query_SingleAvailable = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Single' AND AVAILABILITY = 'Available'" ;
-				res = stmnt.executeQuery(query_SingleAvailable);
-				if (res.next()){
-					noAvail = res.getInt(1);					
-					System.out.println("there are " + noAvail + "single available rooms");
-				}
+				noAvail = getRoomAvailability(hotelID, "Single", "Available");
 				
-				hotelOccupancyInfo.add(new HotelOccupancyDTO(hotelID, HotelLoc, "Single", noOccupied, noAvail));
-				
-			
+				hotelOccupancyInfo.add(new HotelOccupancyDTO(hotelID, HotelLoc, "Single", noOccupied, noAvail));							
 			
 				/***********************************************************************************************************************/
 			
 				/****************************************************  TWIN ROOMS  *****************************************************/
 			
 				// Get 'Occupied' 'Twin' Room amount
-				String query_TwinOccupied = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Twin' AND AVAILABILITY = 'Occupied'" ;
-				res = stmnt.executeQuery(query_TwinOccupied);
-				if (res.next()){
-					noOccupied = res.getInt(1);					
-					System.out.println("there are " + noOccupied + "twin occupied rooms");
-				}
+				noOccupied = getRoomAvailability(hotelID, "Twin", "Occupied");	
 				
 				// Get 'Available' 'Twin' Room amount
-				String query_TwinAvailable = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Twin' AND AVAILABILITY = 'Available'" ;
-				res = stmnt.executeQuery(query_TwinAvailable);
-				if (res.next()){
-					noAvail = res.getInt(1);					
-					System.out.println("there are " + noAvail + "twin available rooms");
-				}
+				noAvail = getRoomAvailability(hotelID, "Twin", "Available");
 				
 				hotelOccupancyInfo.add(new HotelOccupancyDTO(hotelID, HotelLoc, "Twin", noOccupied, noAvail));
 			
@@ -98,20 +77,10 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 				
 				/****************************************************  QUEEN ROOMS  *****************************************************/
 				// Get 'Occupied' 'Queen' Room amount
-				String query_QueenOccupied = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Queen' AND AVAILABILITY = 'Occupied'" ;
-				res = stmnt.executeQuery(query_QueenOccupied);
-				if (res.next()){
-					noOccupied = res.getInt(1);					
-					System.out.println("there are " + noOccupied + "Queen occupied rooms");
-				}
+				noOccupied = getRoomAvailability(hotelID, "Queen", "Occupied");	
 				
 				// Get 'Available' 'Queen' Room amount
-				String query_QueenAvailable = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Queen' AND AVAILABILITY = 'Available'" ;
-				res = stmnt.executeQuery(query_QueenAvailable);
-				if (res.next()){
-					noAvail = res.getInt(1);					
-					System.out.println("there are " + noAvail + "Queen available rooms");
-				}
+				noAvail = getRoomAvailability(hotelID, "Queen", "Available");
 				
 				
 				hotelOccupancyInfo.add(new HotelOccupancyDTO(hotelID, HotelLoc, "Queen", noOccupied, noAvail));
@@ -119,40 +88,20 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 				
 				/***********************************************  EXECUTIVE ROOMS  *****************************************************/
 				// Get 'Occupied' 'Executive' Room amount
-				String query_ExecutiveOccupied = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Executive' AND AVAILABILITY = 'Occupied'" ;
-				res = stmnt.executeQuery(query_ExecutiveOccupied);
-				if (res.next()){
-					noOccupied = res.getInt(1);					
-					System.out.println("there are " + noOccupied + "Executive occupied rooms");
-				}
+				noOccupied = getRoomAvailability(hotelID, "Executive", "Occupied");	
 				
 				// Get 'Available' 'Executive' Room amount
-				String query_ExecutiveAvailable = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Executive' AND AVAILABILITY = 'Available'" ;
-				res = stmnt.executeQuery(query_ExecutiveAvailable);
-				if (res.next()){
-					noAvail = res.getInt(1);					
-					System.out.println("there are " + noAvail + "Executive available rooms");
-				}
+				noAvail = getRoomAvailability(hotelID, "Executive", "Available");
 				
 				hotelOccupancyInfo.add(new HotelOccupancyDTO(hotelID, HotelLoc, "Executive", noOccupied, noAvail));
 				/***********************************************************************************************************************/
 				
 				/***************************************************  SUITE ROOMS  *****************************************************/
 				// Get 'Occupied' 'Suite' Room amount
-				String query_SuiteOccupied = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Suite' AND AVAILABILITY = 'Occupied'" ;
-				res = stmnt.executeQuery(query_SuiteOccupied);
-				if (res.next()){
-					noOccupied = res.getInt(1);					
-					System.out.println("there are " + noOccupied + "Suite occupied rooms");
-				}
+				noOccupied = getRoomAvailability(hotelID, "Suite", "Occupied");	
 				
 				// Get 'Available' 'Suite' Room amount
-				String query_SuiteAvailable = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = 'Suite' AND AVAILABILITY = 'Available'" ;
-				res = stmnt.executeQuery(query_SuiteAvailable);
-				if (res.next()){
-					noAvail = res.getInt(1);					
-					System.out.println("there are " + noAvail + "Suite available rooms");
-				}
+				noAvail = getRoomAvailability(hotelID, "Suite", "Available");
 				
 				hotelOccupancyInfo.add(new HotelOccupancyDTO(hotelID, HotelLoc, "Suite", noOccupied, noAvail));
 				/***********************************************************************************************************************/
@@ -222,6 +171,25 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 			
 			return hotelLoc;
 			
+		}
+		
+		public int getRoomAvailability(int hotelID, String roomType, String availability){
+			int result = 0;
+			try{			
+				Statement stmnt = connection.createStatement();
+				
+				String query = "SELECT COUNT(AVAILABILITY) FROM ROOMS WHERE HOTEL = " + hotelID + " AND SIZE = " + "'" + roomType + "'" +  " AND AVAILABILITY = " + "'" + availability + "'"  ;
+				
+				ResultSet res = stmnt.executeQuery(query);				
+				if (res.next()){
+					result = res.getInt(1);					
+				}
+			}catch(Exception e){
+				System.out.println("Caught Exception");
+				e.printStackTrace();
+			}
+			
+			return result;
 		}
 		
 
