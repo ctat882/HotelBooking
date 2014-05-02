@@ -45,18 +45,11 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 			}
 			
 			for (int hotelID = 1; hotelID <= noHotels; ++hotelID){ 						
-				// get 'Occupied' and 'Available' amounts for each type of Room ('Single', 'Twin', 'Queen', 'Executive' and 'Suite')
-			
-				
+				// get 'Occupied' and 'Available' amounts for each type of Room ('Single', 'Twin', 'Queen', 'Executive' and 'Suite')			
 				
 				// Get Hotel Location
-				String query_HotelLoc = "SELECT CITY from HOTELS where ID = " + hotelID;
-				res = stmnt.executeQuery(query_HotelLoc);
-				if (res.next()){
-					HotelLoc = res.getString(1);					
-					System.out.println("Hotel Loc: " + HotelLoc);
-				}
-				
+				HotelLoc = getHotelLoc(hotelID);					
+				System.out.println("Hotel Loc: " + HotelLoc);
 				/*******************************************  SINGLE ROOMS  *****************************************************/
 				
 				// Get 'Occupied' 'Single' Room amount
@@ -169,7 +162,67 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 			e.printStackTrace();
 		}
 		
+		
 		return hotelOccupancyInfo;
 	}
+	
+	// Get the number of hotels in the database
+	public int getTotalHotels(){
+		int noHotels = 0;
+		
+		try{			
+			Statement stmnt = connection.createStatement();
+			// Retrieve number of hotels in database
+			String query_NoHotels = "SELECT MAX(ID) FROM HOTELS";	
+			ResultSet res = stmnt.executeQuery(query_NoHotels);
+			logger.info("The result set size is "+res.getFetchSize());
+			if (res.next()){
+				noHotels = res.getInt(1);
+			}
+			
+		}catch(Exception e){
+			System.out.println("Caught Exception");
+			e.printStackTrace();
+		}
+		
+		return noHotels;
+	}
+	
+	// Get a list of all the locations of the hotels in the database
+		public ArrayList<String> getHotelLocList(){
+			ArrayList<String> hotelLoc = new ArrayList<String>();
+			
+			int noHotels = getTotalHotels();
+			
+			for (int hotelID = 1; hotelID <= noHotels; ++hotelID){ 							
+				hotelLoc.add(getHotelLoc(hotelID));
+			}
+					
+			return hotelLoc;
+		}
+		
+		// Get the Location of a Hotel using its hotelID.
+		public String getHotelLoc(int hotelID){
+			
+			String hotelLoc = "";
+			
+			try{			
+				Statement stmnt = connection.createStatement();
+				
+				String query_HotelLoc = "SELECT CITY from HOTELS where ID = " + hotelID;
+				ResultSet res = stmnt.executeQuery(query_HotelLoc);
+				res = stmnt.executeQuery(query_HotelLoc);
+				if (res.next()){
+					hotelLoc = res.getString(1);	
+				}
+			}catch(Exception e){
+				System.out.println("Caught Exception");
+				e.printStackTrace();
+			}
+			
+			return hotelLoc;
+			
+		}
+		
 
 }
