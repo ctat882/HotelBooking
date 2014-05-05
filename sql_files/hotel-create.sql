@@ -35,7 +35,7 @@ CREATE TABLE Bookings (
 	size			VARCHAR(20) NOT NULL,
 	quantity		INTEGER NOT NULL,
 	pin				INTEGER NOT NULL,
-	url				VARCHAR(30) NOT NULL,
+	url				VARCHAR(70) NOT NULL,
 	extra_bed		INTEGER DEFAULT 0,
 
 	-- Constraints	

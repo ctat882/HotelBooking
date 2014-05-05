@@ -1,4 +1,4 @@
-package edu.unsw.comp9321;
+package edu.unsw.comp9321.jdbc;
 
 import java.sql.Date;
 

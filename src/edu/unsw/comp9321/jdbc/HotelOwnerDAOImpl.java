@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import edu.unsw.comp9321.common.ServiceLocatorException;
+import edu.unsw.comp9321.logic.common.ServiceLocatorException;
 
 public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 	
