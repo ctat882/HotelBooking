@@ -19,9 +19,9 @@ public class DiscountDAOImpl implements DiscountDAO {
 	}
 
 	@Override
-	public Boolean setDiscount(ArrayList<DiscountDTO> discountInfoFull) {
+	public Boolean setDiscount(ArrayList<DiscountDTOGiri> discountInfoFull) {
 		
-		ArrayList<DiscountDTO> discount = discountInfoFull;
+		ArrayList<DiscountDTOGiri> discount = discountInfoFull;
 		Boolean discountNotAdded = false;
 		
 		for (int i = 0; i < discount.size(); ++i){
