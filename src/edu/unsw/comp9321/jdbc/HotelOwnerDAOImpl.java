@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import edu.unsw.comp9321.logic.common.ServiceLocatorException;
+import edu.unsw.comp9321.common.ServiceLocatorException;
 
 public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 	
@@ -27,22 +27,15 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 		
 		ArrayList<HotelOccupancyDTO> hotelOccupancyInfo = new ArrayList<HotelOccupancyDTO>();
 		
-		try{
-			Statement stmnt = connection.createStatement();
+		try{			
 			
 			int noHotels = 0;
 			String HotelLoc = "";
 			int noAvail = 0;
 			int noOccupied = 0;
-			
+						
 			// Retrieve number of hotels in database
-			String query_NoHotels = "SELECT MAX(ID) FROM HOTELS";	
-		
-			ResultSet res = stmnt.executeQuery(query_NoHotels);
-			logger.info("The result set size is "+res.getFetchSize());
-			if (res.next()){
-				noHotels = res.getInt(1);
-			}
+			noHotels = getTotalHotels();
 			
 			for (int hotelID = 1; hotelID <= noHotels; ++hotelID){ 						
 				// get 'Occupied' and 'Available' amounts for each type of Room ('Single', 'Twin', 'Queen', 'Executive' and 'Suite')			
@@ -172,7 +165,7 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 			return hotelLoc;
 			
 		}
-		
+		// Retrieve the number of 'Available' and 'Occupied' rooms.
 		public int getRoomAvailability(int hotelID, String roomType, String availability){
 			int result = 0;
 			try{			

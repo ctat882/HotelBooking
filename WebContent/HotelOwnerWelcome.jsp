@@ -11,32 +11,55 @@
 </head>
 <body>
 
-	<c:forEach begin="1" end="${noHotels}" varStatus="loop">		
+	<c:set var="count" value="0" scope="page" />
 
-		<h1 align="center">${hotelLoc[loop.index - 1]}</h1>
+		<div style="width:1000px">
 		
+		<form action='HotelOwnerController' method='POST'>  
 		
-		<form action='cartController' method='POST'>                      <%-- ADJUST METHOD!!!!!!!!!!!!!!!!!!!!!!!  --%>     
-				<table style="width:1000px" style="text-align:center">
-					<tr style="text-align:center">
-						<th>Room Type</th>
-						<th>Occupied</th>
-						<th>Available</th>						
-					</tr>
-					
-					<c:forEach var="item" items="${hotelOccupancy}">					
-						 <c:if test="${item.hotelID == loop.index}">   								
-							<tr style="text-align:center">
-							  <td>${item.roomType}</td>
-							  <td>${item.occupied}</td>
-							  <td>${item.available}</td>	  
-							</tr>
-						</c:if>
-					</c:forEach>
-				</table>				
+			<c:forEach begin="1" end="${noHotels}" varStatus="loop">		
+				
+					<h1 style="text-align:center">${hotelLoc[loop.index - 1]} </h1>                     
+					<table style="width:100%">
+						<tr style="text-align:center">
+							<th>Room Type</th>
+							<th>Occupied</th>
+							<th>Available</th>
+							<th>Add Discount?</th>						
+						</tr>
+							
+						<c:forEach var="item" items="${hotelOccupancy}">					
+							 <c:if test="${item.hotelID == loop.index}">   								
+								<tr style="text-align:center">
+								  <td>${item.roomType}</td>
+								  <td>${item.occupied}</td>
+								  <td>${item.available}</td>
+								  <td><input type="checkbox" name="checked${count}"></td>
+								   <td><input type="hidden" name="id${count}"></td>								  
+								   <td><input type="hidden" name="hotelLocation${count}" value="${item.hotelLocation}"></td>	
+								   <td><input type="hidden" name="roomType${count}" value="${item.roomType}"></td>
+								   <td><input type="hidden" name="hotelID${count}" value="${item.hotelID}"></td>	
+								   <c:set var="count" value="${count + 1}" scope="page"/>		 	  
+								</tr>
+							</c:if>							
+						</c:forEach>
+						
+					</table>
+				
+			</c:forEach>
+			
+			<div style="text-align:center">
+				<br>
+			 	<input  type="submit" name="action" value="Add Discount(s)"/>
+			</div>
+							
 		</form>
 		
-	</c:forEach>
+		</div>
+
+	
+	
+	
 	
 </body>
 </html>
