@@ -1,119 +1,65 @@
 package edu.unsw.comp9321.jdbc;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class DiscountDTO {
+	private int id;
+	private int hotel;
+	private String room_type;
+	private Date start_date;
+	private Date end_date;
+	private int discount;
+	
+	public DiscountDTO() {}
 
-	int hotelID;
-	String roomType;
-	String hotelLocation;
-	
-	int startDateDay;
-	int startDateMonth;
-	int startDateYear;
-	
-	int endDateDay;
-	int endDateMonth;
-	int endDateYear;
-	
-	Date endDate;
-	Double discount;
-	
-	/************************* Set Methods ******************/
-	
-	// Set Hotel ID
-	public void setHotelID(int hotelID){
-		this.hotelID = hotelID;		
+	public int getId() {
+		return id;
 	}
-	
-	// Set Hotel Location
-	public void setHotelLocation(String hotelLocation){
-		this.hotelLocation = hotelLocation;		
+
+	public void setId(int id) {
+		this.id = id;
 	}
-	
-	// Set Room Type
-	public void setRoomType(String roomType){
-		this.roomType = roomType;	
+
+	public int getHotel() {
+		return hotel;
 	}
-	
-	// Set Start Date
-	public void setStartDateDay(int startDateDay){
-		this.startDateDay = startDateDay;	
+
+	public void setHotel(int hotel) {
+		this.hotel = hotel;
 	}
-	
-	public void setStartDateMonth(int startDateMonth){
-		this.startDateMonth = startDateMonth;	
+
+	public String getRoom_type() {
+		return room_type;
 	}
-	
-	public void setStartDateYear(int startDateYear){
-		this.startDateYear = startDateYear;	
+
+	public void setRoom_type(String room_type) {
+		this.room_type = room_type;
 	}
-		
-	
-	
-	// Set End Date
-	public void setEndDateDay(int endDateDay){
-		this.endDateDay = endDateDay;	
+
+	public Date getStart_date() {
+		return start_date;
 	}
-	
-	public void setEndDateMonth(int endDateMonth){
-		this.endDateMonth= endDateMonth;	
+
+	public void setStart_date(Date start_date) {
+		this.start_date = start_date;
 	}
-	
-	public void setEndDateYear(int endDateYear){
-		this.endDateYear= endDateYear;	
+
+	public Date getEnd_date() {
+		return end_date;
 	}
-	
-	// Set Discount
-	public void setDiscount(Double discount){
-		this.discount = discount;	
+
+	public void setEnd_date(Date end_date) {
+		this.end_date = end_date;
 	}
-	
-	
-	/************************* Get Methods ******************/
-	// Get Hotel ID
-	public int getHotelID(){
-		return hotelID;		
+
+	public int getDiscount() {
+		return discount;
 	}
+
+	public void setDiscount(int discount) {
+		this.discount = discount;
+	};
 	
-	// Get Room Type
-	public String getRoomType(){
-		return roomType;		
-	}
 	
-	// Get Start Date
-	public int getStartDateDay(){
-		return startDateDay;		
-	}
 	
-	public int getStartDateMonth(){
-		return startDateMonth;		
-	}
-	
-	public int getStartDateYear(){
-		return startDateYear;		
-	}
-	
-	// Get End Date	
-	public int getEndDateDay(){
-		return endDateDay;		
-	}
-	
-	public int getEndDateMonth(){
-		return endDateMonth;		
-	}
-	
-	public int getEndDateYear(){
-		return endDateYear;		
-	}
-	
-	// Get Discount
-	public Double getDiscount(){
-		return discount;		
-	}
-	
-	// Get Hotel Location
-	public String getHotelLocation(){
-		return hotelLocation;		
-	}
 }
