@@ -35,7 +35,7 @@ CREATE TABLE Bookings (
 	size			VARCHAR(20) NOT NULL,
 	quantity		INTEGER NOT NULL,
 	pin				INTEGER NOT NULL,
-	url				VARCHAR(70) NOT NULL,
+	url				VARCHAR(30) NOT NULL,
 	extra_bed		INTEGER DEFAULT 0,
 
 	-- Constraints	
@@ -68,5 +68,5 @@ CREATE TABLE Bookings (
  	CONSTRAINT discount_end_ck CHECK (end_date >= start_date),
  	-- Keys
  	FOREIGN KEY(hotel) REFERENCES Hotels(id),
- 	PRIMARY KEY(discount_id) 	
+ 	PRIMARY KEY(hotel,room_type,start_date,end_date) 	
  );
