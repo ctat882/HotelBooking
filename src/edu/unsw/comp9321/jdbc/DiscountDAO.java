@@ -5,6 +5,6 @@ import java.util.ArrayList;
 // Holds Discount information
 public interface DiscountDAO {
 	
-	public Boolean setDiscount(ArrayList<DiscountDTO> discountInfoFull);
+	public Boolean setDiscount(ArrayList<DiscountDTOGiri> discountInfoFull);
 	
 }

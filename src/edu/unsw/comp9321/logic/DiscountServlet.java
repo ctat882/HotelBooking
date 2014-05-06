@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import edu.unsw.comp9321.jdbc.DiscountDTO;
+import edu.unsw.comp9321.jdbc.DiscountDTOGiri;
 
 public class DiscountServlet extends HttpServlet{	
 	
@@ -32,7 +33,7 @@ public class DiscountServlet extends HttpServlet{
 			int counter = 0;
 			
 			// store the discount information into an array of DiscountDTO's
-			ArrayList<DiscountDTO> discountInfo = new ArrayList<DiscountDTO>();	
+			ArrayList<DiscountDTOGiri> discountInfo = new ArrayList<DiscountDTOGiri>();	
 			
 			while (request.getParameterMap().containsKey("id" + counter)){
 				
@@ -40,7 +41,7 @@ public class DiscountServlet extends HttpServlet{
 				
 				// Get the information from the ticked check boxes (hotels and rooms that a discount will be applied to)
 				if (check != null){
-					DiscountDTO discDTO = new DiscountDTO();
+					DiscountDTOGiri discDTO = new DiscountDTOGiri();
 					int hotelID = Integer.parseInt(request.getParameter("hotelID" + counter));
 					String hotelLoc = request.getParameter("hotelLocation" + counter);	
 					String roomType = request.getParameter("roomType" + counter);			
@@ -112,7 +113,7 @@ public class DiscountServlet extends HttpServlet{
 				
 				HttpSession session = request.getSession();
 				// Add the additional discount information into "discountInfo"
-				ArrayList<DiscountDTO> discountInfo = (ArrayList<DiscountDTO>) session.getAttribute("discountInfo");
+				ArrayList<DiscountDTOGiri> discountInfo = (ArrayList<DiscountDTOGiri>) session.getAttribute("discountInfo");
 					
 				// Set Discount Start Date
 				discountInfo.get(counter).setStartDateDay(startDay);

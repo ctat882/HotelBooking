@@ -17,6 +17,7 @@ import edu.unsw.comp9321.common.ServiceLocatorException;
 import edu.unsw.comp9321.jdbc.DiscountDAO;
 import edu.unsw.comp9321.jdbc.DiscountDAOImpl;
 import edu.unsw.comp9321.jdbc.DiscountDTO;
+import edu.unsw.comp9321.jdbc.DiscountDTOGiri;
 import edu.unsw.comp9321.jdbc.HotelOwnerDAO;
 import edu.unsw.comp9321.jdbc.HotelOwnerDAOImpl;
 
@@ -76,7 +77,7 @@ public class HotelOwnerController extends HttpServlet{
 		else if(action.equals("Confirm Discount(s)")){
 			// Save the discounts to the database
 			HttpSession session = request.getSession();
-			ArrayList<DiscountDTO> discountInfoFull = (ArrayList<DiscountDTO>) session.getAttribute("discountInfo");
+			ArrayList<DiscountDTOGiri> discountInfoFull = (ArrayList<DiscountDTOGiri>) session.getAttribute("discountInfo");
 			
 			// Check to see whether there were any failures in adding Discounts to the database
 			Boolean discountAdded = discountInfo.setDiscount(discountInfoFull);

@@ -2,6 +2,7 @@ package edu.unsw.comp9321.jdbc;
 
 import java.io.IOException;
 
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 import edu.unsw.comp9321.jdbc.HotelOwnerDAO;
 import edu.unsw.comp9321.jdbc.HotelOwnerDAOImpl;
 import edu.unsw.comp9321.logic.Controller;
-import edu.unsw.comp9321.logic.common.ServiceLocatorException;
+import edu.unsw.comp9321.common.ServiceLocatorException;
 
 
 public class HotelOwnerController extends HttpServlet{
