@@ -8,14 +8,14 @@ public class VacancyQueryDTO {
 	private Double maxPrice;
 	private Date checkIn;
 	private Date checkOut;
-	private int rooms;
+	private int numRooms;
 	
 	
 	public VacancyQueryDTO () {
 		this.city = "";
 		this.checkIn = null;
 		this.checkOut = null;
-		this.rooms = 0;
+		this.numRooms = 0;
 		this.maxPrice = 0.0;
 	}
 
@@ -27,7 +27,7 @@ public class VacancyQueryDTO {
 		this.maxPrice = maxPrice;
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
-		this.rooms = rooms;
+		this.numRooms = rooms;
 	}
 
 
@@ -71,13 +71,13 @@ public class VacancyQueryDTO {
 	}
 
 
-	public int getRooms() {
-		return rooms;
+	public int getNumRooms() {
+		return numRooms;
 	}
 
 
-	public void setRooms(int rooms) {
-		this.rooms = rooms;
+	public void setNumRooms(int rooms) {
+		this.numRooms = rooms;
 	}
 	
 }

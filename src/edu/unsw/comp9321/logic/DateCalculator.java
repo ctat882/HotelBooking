@@ -21,6 +21,45 @@ public class DateCalculator {
 	
 	public DateCalculator(){};
 	
+	public double findHighestPrice (double[] totals, Date check_in, Date check_out) {
+		Calendar start = Calendar.getInstance();
+		start.setTime(check_in);		
+		Calendar end = Calendar.getInstance();
+		end.setTime(check_out);
+		GregorianCalendar greg = new GregorianCalendar();
+		// If leap year subtract one day from Day Of Year
+		int startDOY = start.get(Calendar.DAY_OF_YEAR);
+		if (greg.isLeapYear(start.get(Calendar.YEAR))) startDOY--;		
+		int endDOY = end.get(Calendar.DAY_OF_YEAR);
+		if (greg.isLeapYear(end.get(Calendar.YEAR))) endDOY--;
+		double max = 0.0;
+		
+		if (startDOY < endDOY) {		// Then standard calculation
+			//numNightsStay = checkOutDOY - checkInDOY;
+			for (int i = startDOY - 1; i < endDOY; i++) {
+				if (totals[i] > max) max = totals[i];				
+			}
+		}
+		else {	// Wrap around
+			// = (dec31 - checkInDOY) + checkOutDOY;	//TODO probably -1 from checkout date
+			for (int i = jan01 - 1; i < endDOY; i++) {
+				if (totals[i] > max) max = totals[i];
+			}
+			for (int i = startDOY - 1; i < dec31; i++) {
+				if (totals[i] > max) max = totals[i];
+			}
+			
+		}
+		
+		return max;
+	}
+	
+	/**
+	 * Map the discounts for a type of room (in a particular hotel) to a 365 day
+	 * calendar.
+	 * @param discounts
+	 * @param discount
+	 */
 	public void fillDiscountDays (int[] discounts, DiscountDTO discount) {
 		Calendar start = Calendar.getInstance();
 		start.setTime(discount.getStart_date());		
@@ -33,7 +72,22 @@ public class DateCalculator {
 		int endDOY = end.get(Calendar.DAY_OF_YEAR);
 		if (greg.isLeapYear(end.get(Calendar.YEAR))) endDOY--;
 		
-		
+		if (startDOY < endDOY) {		// Then standard calculation
+			//numNightsStay = checkOutDOY - checkInDOY;
+			for (int i = startDOY - 1; i < endDOY; i++) {
+				discounts[i] = discount.getDiscount();
+			}
+		}
+		else {	// Wrap around
+			// = (dec31 - checkInDOY) + checkOutDOY;	//TODO probably -1 from checkout date
+			for (int i = jan01 - 1; i < endDOY; i++) {
+				discounts[i] = discount.getDiscount();
+			}
+			for (int i = startDOY - 1; i < dec31; i++) {
+				discounts[i] = discount.getDiscount();
+			}
+			
+		}		
 	}
 	
 	
@@ -43,7 +97,7 @@ public class DateCalculator {
 	 * @param checkin
 	 * @param checkout
 	 */
-	public void fillDaysOnPeak (Boolean[] onPeak, Date checkin, Date checkout) {
+	public void fillDaysOnPeak (boolean[] onPeak, Date checkin, Date checkout) {
 		
 		Calendar check_in = Calendar.getInstance();
 		check_in.setTime(checkin);		
@@ -76,7 +130,7 @@ public class DateCalculator {
 				else if (i >= sep20 && i <= oct10) onPeak[i] = true;
 				else if (i >= dec15 && i <= dec31) onPeak[i] = true;
 			}
-			for (int i = checkOutDOY - 1; i < dec31; i++) {
+			for (int i = checkInDOY - 1; i < dec31; i++) {
 				if (i >= jan01 && i <= feb15) onPeak[i] = true;
 				else if (i >= mar25 && i <= apr14) onPeak[i] = true;
 				else if (i >= jul01 && i <= jul20) onPeak[i] = true;

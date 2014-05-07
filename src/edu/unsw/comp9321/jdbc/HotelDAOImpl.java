@@ -5,8 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import edu.unsw.comp9321.logic.DateCalculator;
@@ -46,7 +49,8 @@ public class HotelDAOImpl implements HotelDAO{
 				available
 			-> Get any discounts that may be active during this time
 			-> Determine on or off peak
-			-> Compute the discounts
+			-> Compute the price hikes and discounts
+			-> Determine results based on query (max spend)
 		*/
 		
 		ArrayList<RoomDTO> rooms = getAllRooms(query);
@@ -60,188 +64,134 @@ public class HotelDAOImpl implements HotelDAO{
 		// criteria of the query
 		
 		eliminateRoomsOnBookings(rooms,bookings);
-		// Determine peak days
-		DateCalculator dC = new DateCalculator();
-		
-		int daysOnPeak = dC.numDaysOnPeak(query.getCheckIn(), query.getCheckOut());
-		
-		
-		// create two arrays, one for the days on peak, and the other for days with discounts.
-		// This way, can iterate over them side by side.
-		
-		Boolean[] on_peak = new Boolean[365];
-		dC.fillDaysOnPeak(on_peak, query.getCheckIn(), query.getCheckOut());
-		int[] singles_discount = new int[365];
-		int[] twin_discount = new int[365];
-		int[] queen_discount = new int[365];
-		int[] exec_discount = new int[365];
-		int[] suite_discount = new int[365];
-		
-		 
-		for (DiscountDTO disc : discounts) {
-			if (disc.getRoom_type().contentEquals("Single")) {
-				
+		if (rooms.size() >= query.getNumRooms()) {				
+			
+			// Determine peak days
+			DateCalculator dC = new DateCalculator();
+			// create two sets of arrays, one for the days on peak, and the other for days with discounts.
+			// This way, can iterate over them side by side.
+			
+			boolean[] on_peak = new boolean[365];
+			dC.fillDaysOnPeak(on_peak, query.getCheckIn(), query.getCheckOut());
+			int[] single_discount = new int[365];
+			int[] twin_discount = new int[365];
+			int[] queen_discount = new int[365];
+			int[] exec_discount = new int[365];
+			int[] suite_discount = new int[365];		
+			 
+			for (DiscountDTO disc : discounts) {
+				if (disc.getRoom_type().contentEquals("Single")) {
+					dC.fillDiscountDays(single_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Twin")) {
+					dC.fillDiscountDays(twin_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Queen")) {
+					dC.fillDiscountDays(queen_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Executive")) {
+					dC.fillDiscountDays(exec_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Suite")) {
+					dC.fillDiscountDays(suite_discount, disc);
+				}			
 			}
-			else if (disc.getRoom_type().contentEquals("Twin")) {
-				
+			
+			double[] sTotal = new double[365];
+			Arrays.fill(sTotal, 70.00);
+			calculateTotals(on_peak,single_discount,sTotal);
+			
+			double[] tTotal = new double[365];
+			Arrays.fill(tTotal, 120.00);
+			calculateTotals(on_peak,twin_discount,tTotal);
+			
+			double[] qTotal = new double[365];
+			Arrays.fill(qTotal, 120.00);
+			calculateTotals(on_peak,queen_discount,qTotal);
+			
+			double[] eTotal = new double[365];
+			Arrays.fill(eTotal, 180.00);
+			calculateTotals(on_peak,exec_discount,eTotal);
+			
+			double[] suiteTotal = new double[365];
+			Arrays.fill(suiteTotal, 300.00);
+			calculateTotals(on_peak,suite_discount,suiteTotal);
+			
+			HashMap<String,double[]> totals = new HashMap<String,double[]>(8);
+			totals.put("Single", sTotal);
+			totals.put("Twin", tTotal);
+			totals.put("Queen",qTotal);
+			totals.put("Executive",eTotal);
+			totals.put("Suite",suiteTotal);
+			
+			// Now to determine what rooms meet the query criteria
+			
+			// Map number of rooms available of each type
+			HashMap<String,Integer> roomsAvail = new HashMap<String,Integer>(8);
+			roomsAvail.put("Single", 0);
+			roomsAvail.put("Twin", 0);
+			roomsAvail.put("Queen", 0);
+			roomsAvail.put("Executive", 0);
+			roomsAvail.put("Suite", 0);
+			for(RoomDTO r : rooms) {
+				roomsAvail.put(r.getSize(), roomsAvail.get(r.getSize()) + 1);
 			}
-			else if (disc.getRoom_type().contentEquals("Queen")) {
-				
+			
+			HashMap<String,Boolean> meetCriteria = new HashMap<String,Boolean>(8);
+			meetCriteria.put("Single", false);
+			meetCriteria.put("Twin", false);
+			meetCriteria.put("Queen", false);
+			meetCriteria.put("Executive", false);
+			meetCriteria.put("Suite", false);
+			
+			// check against financial constraint
+			for (String key : roomsAvail.keySet()) {
+				if(roomsAvail.get(key) > 0) {
+					double highest = dC.findHighestPrice(totals.get(key), query.getCheckIn(), query.getCheckOut());
+					if (highest <= query.getMaxPrice()) {
+						meetCriteria.put(key, true);
+					}
+				}
 			}
-			else if (disc.getRoom_type().contentEquals("Executive")) {
-				
+			
+			// now to check the combinations against the quantity of rooms requested
+			// PERMUTATIONS WITHOUT REPETITION, should be n! results (rooms.size() factorial).
+			//TODO:
+			// http://programminggeeks.com/recursive-permutation-in-java/
+			for (String key : meetCriteria.keySet()) {
+				if (meetCriteria.get(key)) {	// if true
+					
+				}
 			}
-			else if (disc.getRoom_type().contentEquals("Suite")) {
-				
-			}			
+			
 		}
 		
 		return null;
 	}
 	
-	/**
-	 * Assumes that the booking is less than 365 days
-	 * @param query
-	 * @return
-	 */
-	private int numDaysOnPeak (VacancyQueryDTO query) {
-		/*Peak periods are 
-		 * Dec. 15th - Feb 15th, 
-		 * March 25th - April 14th, 
-		 * July 1st - July 20th
-		 * Sept. 20th - Oct 10th.		
-		*/
-		
-		/** DAYS OF THE YEAR */
-		final int jan01 = 1;
-		final int feb15 = 46;		
-		final int mar25 = 84;
-		final int apr14 = 105;		
-		final int jul01 = 183;
-		final int jul20 = 202;		
-		final int sep20 = 264;
-		final int oct10 = 283;		
-		final int dec15 = 349;
-		final int dec31 = 365;
-		
-		// Get Query dates
-		Calendar check_in = Calendar.getInstance();
-		check_in.setTime(query.getCheckIn());		
-		Calendar check_out = Calendar.getInstance();
-		check_out.setTime(query.getCheckOut());
-		// Check if leap year
-		GregorianCalendar greg = new GregorianCalendar();
-		// If leap year subtract one day from Day Of Year
-		int checkInDOY = check_in.get(Calendar.DAY_OF_YEAR);
-		if (greg.isLeapYear(check_in.get(Calendar.YEAR))) checkInDOY--;		
-		int checkOutDOY = check_out.get(Calendar.DAY_OF_YEAR);
-		if (greg.isLeapYear(check_out.get(Calendar.YEAR))) checkOutDOY--;		
-		int daysInPeak = 0;		
-		// Now determine if check in and check out fall within range of peak periods
-		// TODO probably have to add +1 here		
-		if ( checkInDOY >= jan01 && checkInDOY <= feb15  ) {
-			if (checkOutDOY >= jan01 && checkOutDOY <= feb15) {
-				daysInPeak += (checkOutDOY - checkInDOY);
-			}
-			else if (checkOutDOY >= mar25 && checkOutDOY <= apr14) {
-				daysInPeak += (feb15 - checkInDOY) + (checkOutDOY -mar25);
-			}
-			else if (checkOutDOY >= jul01 && checkOutDOY <= jul20) {
-				daysInPeak += (feb15 - checkInDOY) + (apr14 - mar25) 
-						+ (checkOutDOY - jul01);
-			}
-			else if (checkOutDOY >= sep20 && checkOutDOY <= oct10) {
-				daysInPeak += (feb15 - checkInDOY) + (apr14 - mar25) + (jul20 - jul01) 
-						+ (checkOutDOY - sep20);
-			}
-			else if (checkOutDOY >= dec15 && checkOutDOY <= dec31) {
-				daysInPeak += (feb15 - checkInDOY) + (apr14 - mar25) + (jul20 - jul01) 
-						+ (oct10 - sep20) + (checkOutDOY - dec15);
-			}
-		}
-		else if (checkInDOY >= mar25 && checkInDOY <= apr14 ) {
-			if (checkOutDOY >= mar25 && checkOutDOY <= apr14) {
-				daysInPeak += (checkOutDOY - checkInDOY);
-			}
-			else if (checkOutDOY >= jul01 && checkOutDOY <= jul20) {
-				daysInPeak += ( apr14 - checkInDOY) + (checkOutDOY - jul01);
-			}
-			else if (checkOutDOY >= sep20 && checkOutDOY <= oct10) {
-				daysInPeak += ( apr14 - checkInDOY) + (jul20 - jul01) 
-						+ (checkOutDOY - sep20);
-			}
-			else if (checkOutDOY >= dec15 && checkOutDOY <= dec31) {
-				daysInPeak += ( apr14 - checkInDOY) + (jul20 - jul01)
-						+ (oct10 - sep20) + (checkOutDOY - dec15);
-			}
-			else if (checkOutDOY >= jan01 && checkOutDOY <= feb15) {
-				daysInPeak += ( apr14 - checkInDOY) + (jul20 - jul01) + (oct10 - sep20) 
-						+ (dec31 - dec15) + (checkOutDOY - jan01);
-			}
-			
-		}
-		else if (checkInDOY >= jul01 && checkInDOY <= jul20) {
-			if (checkOutDOY >= jul01 && checkInDOY <= jul20) {
-				daysInPeak += (checkOutDOY - checkInDOY);
-			}
-			else if (checkOutDOY >= sep20 && checkOutDOY <= oct10) {
-				daysInPeak += ( jul20 - checkInDOY) + (checkOutDOY - sep20);
-			}
-			else if (checkOutDOY >= dec15 && checkOutDOY <= dec31) {
-				daysInPeak += ( jul20 - checkInDOY) + (oct10 - sep20) + (checkOutDOY - dec15);
-			}
-			else if (checkOutDOY >= jan01 && checkOutDOY <= feb15) {
-				daysInPeak += ( jul20 - checkInDOY) + (oct10 - sep20) 
-						+ (dec31 - dec15) + (checkOutDOY - jan01);
-			}
-			else if (checkOutDOY >= mar25 && checkOutDOY <= apr14) {
-				daysInPeak += ( jul20 - checkInDOY) + (oct10 - sep20) 
-						+ (dec31 - dec15) + (feb15 - jan01) + (checkOutDOY - mar25);
-			}
-			
-		}
-		else if (checkInDOY >= sep20 && checkInDOY <= oct10) {			
-			if (checkOutDOY >= sep20 && checkOutDOY <= oct10) {
-				daysInPeak += (checkOutDOY - checkInDOY);
-			}
-			else if (checkOutDOY >= dec15 && checkOutDOY <= dec31) {
-				daysInPeak += ( oct10 - checkInDOY) + (checkOutDOY - dec15);
-			}
-			else if (checkOutDOY >= jan01 && checkOutDOY <= feb15) {
-				daysInPeak += ( oct10 - checkInDOY)	+ (dec31 - dec15) + (checkOutDOY - jan01);
-			}
-			else if (checkOutDOY >= mar25 && checkOutDOY <= apr14) {
-				daysInPeak += ( oct10 - checkInDOY)	+ (dec31 - dec15) 
-						+ (feb15 - jan01) + (checkOutDOY - mar25);
-			}
-			else if (checkOutDOY >= jul01 && checkInDOY <= jul20) {
-				daysInPeak += ( oct10 - checkInDOY)	+ (dec31 - dec15) 
-						+ (feb15 - jan01) + (apr14 - mar25) + (checkOutDOY - jul01);
-			}
-			
-		}
-		else if (checkInDOY >= dec15 && checkInDOY <= dec31) {
-			if (checkOutDOY >= dec15 && checkOutDOY <= dec31) {
-				daysInPeak += (checkOutDOY - checkInDOY);
-			}
-			else if (checkOutDOY >= jan01 && checkOutDOY <= feb15) {
-				daysInPeak += ( dec31 - checkInDOY) + (checkOutDOY - jan01);
-			}
-			else if (checkOutDOY >= mar25 && checkOutDOY <= apr14) {
-				daysInPeak += ( dec31 - checkInDOY)	+ (feb15 - jan01) + (checkOutDOY - mar25);
-			}
-			else if (checkOutDOY >= jul01 && checkInDOY <= jul20) {
-				daysInPeak += ( dec31 - checkInDOY)	+ (feb15 - jan01) 
-						+ (apr14 - mar25) + (checkOutDOY - jul01);
-			}
-			else if (checkOutDOY >= sep20 && checkOutDOY <= oct10) {
-				daysInPeak += ( dec31 - checkInDOY)	+ (feb15 - jan01) 
-						+ (apr14 - mar25) + (jul20 - jul01) + (checkOutDOY - sep20);
-			}
-		}		
-		return daysInPeak;		
-	}
 	
+	
+	/**
+	 * Get the total price for a room over 365 days (starting from query check in date).
+	 * Apply any price hikes and discounts.
+	 * @param basePrice
+	 * @param peak
+	 * @param discount
+	 * @param total
+	 */
+	private void calculateTotals (boolean[] peak, int[] discount, double[] total) {
+		for(int i = 0; i < total.length;i++) {
+			// add the peak hike of 40% 
+			if (peak[i]) {
+				total[i] += (total[i] *  0.4);
+			}
+			// then apply discount
+			if (discount[i] > 0) {
+				total[i] = total[i] * (discount[i] / 100);
+			}
+		}
+	}
+		
 	private void eliminateRoomsOnBookings (ArrayList<RoomDTO> rooms, ArrayList<BookingDTO> bookings) {
 		boolean allDeleted = false;
 		int numRooms = 0;
