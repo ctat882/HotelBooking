@@ -37,8 +37,20 @@ CREATE TABLE Bookings (
 	pin				INTEGER NOT NULL,
 	url				VARCHAR(30) NOT NULL,
 	extra_bed		INTEGER DEFAULT 0,
+	assigned		VARCHAR(5) NOT NULL,
+	assignedroom	INTEGER,
+	
 
 	-- Constraints	
+	CONSTRAINT assigned_ck CHECK (assigned IN ('Yes', 'No')),	
+	
+	-- If we have assigned a room to the booking ("assigned" = 'Yes') then "assignedroom" CANNOT be NULL	
+	-- If we have NOT assigned a room, then "assignedroom" = NULL	
+	CONSTRAINT assignedroom_ck CHECK (
+    	(assigned = 'Yes' AND assignedroom IS NOT NULL) or
+    	(assigned = 'No' and assignedroom IS NULL)
+	),
+	
 	CONSTRAINT booking_size_ck CHECK (size IN ('Single', 'Twin', 'Queen', 'Executive', 'Suite')),
 	CONSTRAINT extra_bed_ck CHECK (extra_bed IN (0,1)),	
 	CONSTRAINT pin_ck CHECK (pin > 999 AND pin <= 9999),
