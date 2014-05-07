@@ -12,11 +12,24 @@ public class BookingDTO {
 	private int pin;
 	private String url;
 	private boolean extra_bed;
-	// Assigned Room Number
-	private int assignedRoom;
 	// Whether room has been assigned - 'Yes' or 'No'
 	private String assigned;
+	// Assigned Room Number
+	private int assignedRoom;
 	
+	public BookingDTO(int id, int hotel, Date check_in, Date check_out, String size, int quantity, int pin, String url, boolean extra_bed, String assigned, int assignedRoom){
+		this.id = id;
+		this.hotel = hotel;
+		this.check_in = check_in;
+		this.check_out = check_out;
+		this.size = size;
+		this.quantity = quantity;
+		this.pin = pin;
+		this.url = url;
+		this.extra_bed = extra_bed;
+		this.assigned = assigned;
+		this.assignedRoom = assignedRoom;
+	}
 	
 	public String getAssigned() {
 		return assigned;
