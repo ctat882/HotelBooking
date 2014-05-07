@@ -152,8 +152,7 @@ public class HotelOwnerDAOImpl implements HotelOwnerDAO{
 				Statement stmnt = connection.createStatement();
 				
 				String query_HotelLoc = "SELECT CITY from HOTELS where ID = " + hotelID;
-				ResultSet res = stmnt.executeQuery(query_HotelLoc);
-				res = stmnt.executeQuery(query_HotelLoc);
+				ResultSet res = stmnt.executeQuery(query_HotelLoc);				
 				if (res.next()){
 					hotelLoc = res.getString(1);	
 				}
