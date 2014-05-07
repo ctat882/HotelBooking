@@ -70,3 +70,13 @@ CREATE TABLE Bookings (
  	FOREIGN KEY(hotel) REFERENCES Hotels(id),
  	PRIMARY KEY(hotel,room_type,start_date,end_date) 	
  );
+ 
+ --User Table 
+ CREATE TABLE Users (
+ 	hotel_id INTEGER,
+ 	username VARCHAR(20) NOT NULL,
+ 	password VARCHAR(20) NOT NULL,
+ 
+ 	FOREIGN KEY(hotel_id) REFERENCES Hotels(id),
+ 	PRIMARY KEY (hotel_id)
+ );
