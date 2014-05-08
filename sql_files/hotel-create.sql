@@ -29,11 +29,10 @@ CREATE TABLE Rooms (
 -- Booking Table
 CREATE TABLE Bookings (
 	booking_id		INTEGER GENERATED ALWAYS AS IDENTITY,
-	hotel			INTEGER, 
+	hotel			INTEGER,		
 	check_in		DATE NOT NULL,
 	check_out		DATE NOT NULL,
 	size			VARCHAR(20) NOT NULL,
-	quantity		INTEGER NOT NULL,
 	pin				INTEGER NOT NULL,
 	url				VARCHAR(30) NOT NULL,
 	extra_bed		INTEGER DEFAULT 0,
@@ -50,7 +49,8 @@ CREATE TABLE Bookings (
     	(assigned = 'Yes' AND assignedroom IS NOT NULL) or
     	(assigned = 'No' and assignedroom IS NULL)
 	),
-	
+	-- Check checOut date is > checkIn date
+	CONSTRAINT check_in_out_ck CHECK (check_out > check_in),
 	CONSTRAINT booking_size_ck CHECK (size IN ('Single', 'Twin', 'Queen', 'Executive', 'Suite')),
 	CONSTRAINT extra_bed_ck CHECK (extra_bed IN (0,1)),	
 	CONSTRAINT pin_ck CHECK (pin > 999 AND pin <= 9999),
