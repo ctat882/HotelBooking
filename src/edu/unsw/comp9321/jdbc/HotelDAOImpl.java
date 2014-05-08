@@ -4,9 +4,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
+
+import edu.unsw.comp9321.logic.DateCalculator;
+
+
+
+
 
 import edu.unsw.comp9321.common.ServiceLocatorException;
 
@@ -38,7 +48,9 @@ public class HotelDAOImpl implements HotelDAO{
 			-> Get list of bookings for appropriate hotel, subtract from the total rooms
 				available
 			-> Get any discounts that may be active during this time
-			-> Compute the discounts
+			-> Determine on or off peak
+			-> Compute the price hikes and discounts
+			-> Determine results based on query (max spend)
 		*/
 		
 		ArrayList<RoomDTO> rooms = getAllRooms(query);
@@ -51,8 +63,156 @@ public class HotelDAOImpl implements HotelDAO{
 		// and then removing all rooms that don't fit the financial
 		// criteria of the query
 		
+		eliminateRoomsOnBookings(rooms,bookings);
+		if (rooms.size() >= query.getNumRooms()) {				
+			
+			// Determine peak days
+			DateCalculator dC = new DateCalculator();
+			// create two sets of arrays, one for the days on peak, and the other for days with discounts.
+			// This way, can iterate over them side by side.
+			
+			boolean[] on_peak = new boolean[365];
+			dC.fillDaysOnPeak(on_peak, query.getCheckIn(), query.getCheckOut());
+			int[] single_discount = new int[365];
+			int[] twin_discount = new int[365];
+			int[] queen_discount = new int[365];
+			int[] exec_discount = new int[365];
+			int[] suite_discount = new int[365];		
+			 
+			for (DiscountDTO disc : discounts) {
+				if (disc.getRoom_type().contentEquals("Single")) {
+					dC.fillDiscountDays(single_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Twin")) {
+					dC.fillDiscountDays(twin_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Queen")) {
+					dC.fillDiscountDays(queen_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Executive")) {
+					dC.fillDiscountDays(exec_discount, disc);
+				}
+				else if (disc.getRoom_type().contentEquals("Suite")) {
+					dC.fillDiscountDays(suite_discount, disc);
+				}			
+			}
+			
+			double[] sTotal = new double[365];
+			Arrays.fill(sTotal, 70.00);
+			calculateTotals(on_peak,single_discount,sTotal);
+			
+			double[] tTotal = new double[365];
+			Arrays.fill(tTotal, 120.00);
+			calculateTotals(on_peak,twin_discount,tTotal);
+			
+			double[] qTotal = new double[365];
+			Arrays.fill(qTotal, 120.00);
+			calculateTotals(on_peak,queen_discount,qTotal);
+			
+			double[] eTotal = new double[365];
+			Arrays.fill(eTotal, 180.00);
+			calculateTotals(on_peak,exec_discount,eTotal);
+			
+			double[] suiteTotal = new double[365];
+			Arrays.fill(suiteTotal, 300.00);
+			calculateTotals(on_peak,suite_discount,suiteTotal);
+			
+			HashMap<String,double[]> totals = new HashMap<String,double[]>(8);
+			totals.put("Single", sTotal);
+			totals.put("Twin", tTotal);
+			totals.put("Queen",qTotal);
+			totals.put("Executive",eTotal);
+			totals.put("Suite",suiteTotal);
+			
+			// Now to determine what rooms meet the query criteria
+			
+			// Map number of rooms available of each type
+			HashMap<String,Integer> roomsAvail = new HashMap<String,Integer>(8);
+			roomsAvail.put("Single", 0);
+			roomsAvail.put("Twin", 0);
+			roomsAvail.put("Queen", 0);
+			roomsAvail.put("Executive", 0);
+			roomsAvail.put("Suite", 0);
+			for(RoomDTO r : rooms) {
+				roomsAvail.put(r.getSize(), roomsAvail.get(r.getSize()) + 1);
+			}
+			
+			HashMap<String,Boolean> meetCriteria = new HashMap<String,Boolean>(8);
+			meetCriteria.put("Single", false);
+			meetCriteria.put("Twin", false);
+			meetCriteria.put("Queen", false);
+			meetCriteria.put("Executive", false);
+			meetCriteria.put("Suite", false);
+			
+			// check against financial constraint
+			for (String key : roomsAvail.keySet()) {
+				if(roomsAvail.get(key) > 0) {
+					double highest = dC.findHighestPrice(totals.get(key), query.getCheckIn(), query.getCheckOut());
+					if (highest <= query.getMaxPrice()) {
+						meetCriteria.put(key, true);
+					}
+				}
+			}
+			
+			// now to check the combinations against the quantity of rooms requested
+			// PERMUTATIONS WITHOUT REPETITION, should be n! results (rooms.size() factorial).
+			//TODO:
+			// http://programminggeeks.com/recursive-permutation-in-java/
+			for (String key : meetCriteria.keySet()) {
+				if (meetCriteria.get(key)) {	// if true
+					
+				}
+			}
+			
+		}
 		
 		return null;
+	}
+	
+	
+	
+	/**
+	 * Get the total price for a room over 365 days (starting from query check in date).
+	 * Apply any price hikes and discounts.
+	 * @param basePrice
+	 * @param peak
+	 * @param discount
+	 * @param total
+	 */
+	private void calculateTotals (boolean[] peak, int[] discount, double[] total) {
+		for(int i = 0; i < total.length;i++) {
+			// add the peak hike of 40% 
+			if (peak[i]) {
+				total[i] += (total[i] *  0.4);
+			}
+			// then apply discount
+			if (discount[i] > 0) {
+				total[i] = total[i] * (discount[i] / 100);
+			}
+		}
+	}
+		
+	private void eliminateRoomsOnBookings (ArrayList<RoomDTO> rooms, ArrayList<BookingDTO> bookings) {
+		boolean allDeleted = false;
+		int numRooms = 0;
+		for(int i = 0; i < bookings.size(); i++) {
+			numRooms = bookings.get(i).getQuantity();
+			int deleted = 0;
+			int j = rooms.size() - 1;
+			while(! allDeleted) {				
+				if(rooms.get(j).getSize().contentEquals(bookings.get(j).getSize())) {
+					rooms.remove(j);
+					deleted++;
+					if (deleted == numRooms) {
+						allDeleted = true;
+					}
+				}
+				else {
+					j--;
+				}
+			}
+			allDeleted = false;
+		}
 	}
 	
 	/**

@@ -13,7 +13,7 @@ public class InputValidator {
 	 */
 	public boolean isValidDate (Date date) {
 		boolean valid = false;
-		//TODO
+		//TODO Must check that the check in date and check out date are not the same
 		return valid;
 	}
 	
