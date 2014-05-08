@@ -21,6 +21,8 @@ public class DateCalculator {
 	
 	public DateCalculator(){};
 	
+	
+	
 	public double findHighestPrice (double[] totals, Date check_in, Date check_out) {
 		Calendar start = Calendar.getInstance();
 		start.setTime(check_in);		

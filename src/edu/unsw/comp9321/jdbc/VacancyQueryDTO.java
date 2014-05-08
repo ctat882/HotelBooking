@@ -2,6 +2,11 @@ package edu.unsw.comp9321.jdbc;
 
 import java.sql.Date;
 
+
+import java.util.Calendar;
+
+import javax.servlet.http.HttpServletRequest;
+
 public class VacancyQueryDTO {
 
 	private String city;
@@ -19,6 +24,21 @@ public class VacancyQueryDTO {
 		this.maxPrice = 0.0;
 	}
 
+	public VacancyQueryDTO (HttpServletRequest request) {
+		this.city = request.getParameter("city");
+				
+		this.maxPrice = Double.parseDouble(request.getParameter("maxPrice"));
+		this.numRooms = Integer.parseInt(request.getParameter("numRooms"));
+		// Checkin
+		int iDay = Integer.parseInt(request.getParameter("inDay"));
+		int iMonth = Integer.parseInt(request.getParameter("inMonth"));
+		int iYear = Integer.parseInt(request.getParameter("inMonth"));
+		Calendar cIn = Calendar.getInstance();
+		// Checkout
+		int oDay = Integer.parseInt(request.getParameter("outDay"));
+		int oMonth = Integer.parseInt(request.getParameter("outMonth"));
+		int oYear = Integer.parseInt(request.getParameter("outMonth"));
+	}
 
 	public VacancyQueryDTO(String city, Double maxPrice, Date checkIn,
 			Date checkOut, int rooms) {

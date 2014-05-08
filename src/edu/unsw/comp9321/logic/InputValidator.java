@@ -1,6 +1,7 @@
 package edu.unsw.comp9321.logic;
 
-import java.sql.Date;
+import java.util.Date;
+import java.util.Calendar;
 
 public class InputValidator {
 
@@ -11,8 +12,16 @@ public class InputValidator {
 	 * @param date
 	 * @return True if the date is valid, false otherwise
 	 */
-	public boolean isValidDate (Date date) {
-		boolean valid = false;
+	public boolean isValidDate (int day, int month, int year) {
+		boolean valid = true;
+		Calendar cal = Calendar.getInstance();
+		cal.setLenient(false);
+		try {
+			cal.set(year, month - 1, day);
+		} catch (Exception e) {
+			valid = false;
+		}		
+		
 		//TODO Must check that the check in date and check out date are not the same
 		return valid;
 	}
@@ -50,5 +59,42 @@ public class InputValidator {
 		boolean valid = false;
 		//TODO
 		return valid;
+	}
+	
+	public boolean isValidCurrency (String money) {
+		boolean valid = false;
+		if (money.matches("^[0-9]+[.]?[0-9]*$")) valid = true;
+		return valid;
+	}
+	
+	public boolean isValidQuantity (String num) {
+		boolean valid = false;
+		if (num.matches("^[0-9]+$")) valid = true;
+		return valid;
+	}
+	
+	
+	public boolean isCheckOutAfterIn (int iDay,int iMonth, int iYear,int oDay,int oMonth, int oYear) {
+		Calendar in = Calendar.getInstance();
+		in.setLenient(false);
+		Calendar out = Calendar.getInstance();
+		out.setLenient(false);		
+		in.set(iYear, iMonth, iDay);
+		out.set(oYear, oMonth, oDay);
+		boolean isAfter = false;
+		Date cIn = in.getTime();
+		Date cOut = out.getTime();
+		if (cOut.after(cIn)) isAfter = true;
+		return isAfter;
+	}
+	
+	public boolean isCheckInDateInFuture (int day, int month, int year) {
+		boolean isFuture = false;
+		Calendar now = Calendar.getInstance();
+		Calendar in = Calendar.getInstance();
+		in.setLenient(false);
+		in.set(year, month, day);		
+		if(in.after(now)) isFuture = true;		
+		return isFuture;
 	}
 }

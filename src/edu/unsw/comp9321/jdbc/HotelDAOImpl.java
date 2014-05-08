@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -154,13 +155,17 @@ public class HotelDAOImpl implements HotelDAO{
 				}
 			}
 			
+			eliminateRoomsOnPrice(rooms,meetCriteria);
+			
 			// now to check the combinations against the quantity of rooms requested
 			// PERMUTATIONS WITHOUT REPETITION, should be n! results (rooms.size() factorial).
-			//TODO:
-			// http://programminggeeks.com/recursive-permutation-in-java/
-			for (String key : meetCriteria.keySet()) {
-				if (meetCriteria.get(key)) {	// if true
-					
+			
+			ArrayList<ArrayList<RoomDTO>> options = comb(rooms);
+			for(int i = 0; i < options.size(); i++) {
+				System.out.println("Option " + i);
+				for(int j = 0; j < options.get(i).size();j++) {
+					RoomDTO r = options.get(i).get(j);
+					System.out.println(r.getSize() + " ");
 				}
 			}
 			
@@ -169,6 +174,111 @@ public class HotelDAOImpl implements HotelDAO{
 		return null;
 	}
 	
+	/**
+	 * Eliminate rooms that do not meet the max price per night constraint
+	 * @param rooms
+	 * @param meetCriteria
+	 */
+	private void eliminateRoomsOnPrice (ArrayList<RoomDTO> rooms, HashMap<String,Boolean> meetCriteria) {
+		int i = rooms.size() - 1;
+		while (i >= 0) {
+			if (! meetCriteria.get(rooms.get(i).getSize())) {
+				rooms.remove(i);
+			}
+			else {
+				i--;
+			}
+		}		
+	}
+	
+	
+	public static ArrayList<ArrayList<RoomDTO>> comb(ArrayList<RoomDTO> in)
+    {
+        ArrayList<ArrayList<RoomDTO>> out = new ArrayList<ArrayList<RoomDTO>>();
+         
+        for (int i = 0; i < Math.pow(2, in.size()); i ++)
+        {
+            ArrayList<RoomDTO> thing = new ArrayList<RoomDTO>();
+             
+            String t = Integer.toBinaryString(i);
+             
+            String zeroes = new String();
+            for (int o = 0; o < in.size(); o ++)
+            {
+                zeroes = zeroes + "0";
+            }
+             
+            DecimalFormat df = new DecimalFormat(zeroes);
+             
+            String s = df.format(Integer.parseInt(t));
+             
+            for (int j = 0; j < s.length(); j ++)
+            {
+                if (s.charAt(j) == new String("1").charAt(0))
+                {
+                    thing.add(in.get(j));                    
+                }
+                else
+                {
+                     
+                }
+            }
+             
+            out.add(thing);
+        }
+         
+//        for (int i = 0; i < out.size(); i ++)
+//        {
+//            ArrayList<ArrayList<RoomDTO>> permsOfOne = permutations(out.get(i));
+//             
+//            for (int j = 0; j <permsOfOne.size(); j ++)
+//            {
+//                for (int d = 0; d <permsOfOne.get(j).size(); d ++)
+//                {
+//                    System.out.print(permsOfOne.get(j).get(d).getName() + ", ");
+//                }
+//                 
+//                Strategy coolStrat = new Strategy(permsOfOne.get(j));
+//                System.out.print("Sensitivity is:" + coolStrat.getSens() + " Specificity is:" + coolStrat.getSpec() + " Cost is: " + coolStrat.getCost());
+//                 
+//                System.out.println("END");
+//            }
+//        }
+         
+        return out;
+    }
+     
+    public static ArrayList<ArrayList<RoomDTO>> permutations(ArrayList<RoomDTO> list)
+    {
+        return permutations(null, list, null);
+    }
+     
+    public static ArrayList<ArrayList<RoomDTO>> permutations(ArrayList<RoomDTO> prefix, ArrayList<RoomDTO> suffix, ArrayList<ArrayList<RoomDTO>> output)
+    {
+        if(prefix == null)
+            prefix = new ArrayList<RoomDTO>();
+        if(output == null)
+            output = new ArrayList<ArrayList<RoomDTO>>();
+         
+        if(suffix.size() == 1)
+        {
+            ArrayList<RoomDTO> newElement = new ArrayList<RoomDTO>(prefix);
+            newElement.addAll(suffix);
+            output.add(newElement);
+            return output;
+        }
+         
+        for(int i = 0; i < suffix.size(); i++)
+        {
+            ArrayList<RoomDTO> newPrefix = new ArrayList<RoomDTO>(prefix);
+            newPrefix.add(suffix.get(i));
+            ArrayList<RoomDTO> newSuffix = new ArrayList<RoomDTO>(suffix);
+            newSuffix.remove(i);
+            permutations(newPrefix,newSuffix,output);
+        }
+         
+        return output;
+    }
 	
 	
 	/**
@@ -237,6 +347,8 @@ public class HotelDAOImpl implements HotelDAO{
 				r.setSize(allRoomRes.getString("size"));
 				rooms.add(r);
 			}
+			allRoomRes.close();
+			roomQuery.close();
 		}catch(Exception e){
 			System.out.println("Caught Exception");
 			e.printStackTrace();
@@ -272,6 +384,8 @@ public class HotelDAOImpl implements HotelDAO{
 				d.setDiscount(discRes.getInt("discount"));				
 				discounts.add(d);				
 			}
+			discRes.close();
+			discQuery.close();
 		} catch(Exception e){
 			System.out.println("Caught Exception");
 			e.printStackTrace();
@@ -311,6 +425,8 @@ public class HotelDAOImpl implements HotelDAO{
 				b.setSize(bookingRes.getString("size"));
 				bookings.add(b);				
 			}
+			bookingRes.close();
+			bookingQuery.close();
 			
 		}catch(Exception e){
 			System.out.println("Caught Exception");
@@ -318,6 +434,25 @@ public class HotelDAOImpl implements HotelDAO{
 		}
 		
 		return bookings;
+	}
+	
+	@Override
+	public ArrayList<String> getCities() {
+		ArrayList<String> cities = new ArrayList<String>();
+		try {
+			String query = "SELECT CITY FROM HOTELS";
+			PreparedStatement s = connection.prepareStatement(query);
+			ResultSet r = s.executeQuery();
+			while(r.next()) {
+				cities.add(r.getString("city"));
+			}
+			s.close();
+			r.close();
+		}catch(Exception e){
+			System.out.println("Caught Exception");
+			e.printStackTrace();
+		}
+		return cities;
 	}
 	
 
