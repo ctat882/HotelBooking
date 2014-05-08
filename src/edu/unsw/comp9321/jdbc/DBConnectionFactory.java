@@ -4,12 +4,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
-import javax.naming.Context;
+//import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import edu.unsw.comp9321.common.DataSourceException;
 import edu.unsw.comp9321.common.ServiceLocatorException;
 
 /**
@@ -23,7 +22,7 @@ public class DBConnectionFactory {
 	private static DBConnectionFactory factory = null;
 	private DataSource ds = null;
 	private InitialContext ctx;
-	private Context subctx;
+//	private Context subctx;
 	
 	private DBConnectionFactory() throws ServiceLocatorException{
 		try{

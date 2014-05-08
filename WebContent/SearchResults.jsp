@@ -7,9 +7,20 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Rooms Available</title>
 </head>
 <body>
 
+<table>
+<c:forEach items="${results}" var="i">	
+	<tr>
+		<c:forEach var="j" items="${i}">
+			<td><c:out value="${j.size}"/></td>
+		</c:forEach>	
+	</tr>
+
+</c:forEach>
+
+</table>
 </body>
 </html>

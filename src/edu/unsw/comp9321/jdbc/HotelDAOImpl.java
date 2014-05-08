@@ -7,10 +7,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.logging.Logger;
 
 import edu.unsw.comp9321.logic.DateCalculator;
@@ -42,7 +39,7 @@ public class HotelDAOImpl implements HotelDAO{
 	}
 
 	@Override
-	public SearchResults customerRoomSearch(VacancyQueryDTO query) {
+	public ArrayList<ArrayList<RoomDTO>> customerRoomSearch(VacancyQueryDTO query) {
 		
 		/** What to get from the database:
 			-> List of Rooms from hotel that are free
@@ -53,7 +50,7 @@ public class HotelDAOImpl implements HotelDAO{
 			-> Compute the price hikes and discounts
 			-> Determine results based on query (max spend)
 		*/
-		
+		ArrayList<ArrayList<RoomDTO>> options = null;
 		ArrayList<RoomDTO> rooms = getAllRooms(query);
 		ArrayList<BookingDTO> bookings = getHotelBookings(query);
 		ArrayList<DiscountDTO> discounts =getHotelDiscounts(query);
@@ -160,7 +157,9 @@ public class HotelDAOImpl implements HotelDAO{
 			// now to check the combinations against the quantity of rooms requested
 			// PERMUTATIONS WITHOUT REPETITION, should be n! results (rooms.size() factorial).
 			
-			ArrayList<ArrayList<RoomDTO>> options = comb(rooms);
+			options = comb(rooms);
+//			SearchResults options = new SearchResults();
+//			options.setResults(comb(rooms));
 			for(int i = 0; i < options.size(); i++) {
 				System.out.println("Option " + i);
 				for(int j = 0; j < options.get(i).size();j++) {
@@ -171,7 +170,7 @@ public class HotelDAOImpl implements HotelDAO{
 			
 		}
 		
-		return null;
+		return options;
 	}
 	
 	/**
@@ -371,8 +370,8 @@ public class HotelDAOImpl implements HotelDAO{
 									+ "AND d.end_date < ?";			
 			PreparedStatement discQuery = connection.prepareStatement(sqlQuery);
 			discQuery.setString(1, query.getCity());
-			discQuery.setDate(2, query.getCheckIn());
-			discQuery.setDate(3, query.getCheckOut());
+			discQuery.setString(2, query.convertCheckInToString());
+			discQuery.setString(3, query.convertCheckOutToString());
 			ResultSet discRes = discQuery.executeQuery();
 			while(discRes.next()) {
 				DiscountDTO d = new DiscountDTO();
@@ -409,8 +408,8 @@ public class HotelDAOImpl implements HotelDAO{
 									+ "AND b.check_out < ?";
 			PreparedStatement bookingQuery = connection.prepareStatement(sqlQuery);
 			bookingQuery.setString(1, query.getCity());
-			bookingQuery.setDate(2, query.getCheckIn());
-			bookingQuery.setDate(3, query.getCheckOut());
+			bookingQuery.setString(2, query.convertCheckInToString());
+			bookingQuery.setString(3, query.convertCheckOutToString());
 			ResultSet bookingRes = bookingQuery.executeQuery();
 			while(bookingRes.next()) {
 				BookingDTO b = new BookingDTO();

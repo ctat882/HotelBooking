@@ -1,5 +1,7 @@
 package edu.unsw.comp9321.logic;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
 
@@ -94,6 +96,10 @@ public class InputValidator {
 		Calendar in = Calendar.getInstance();
 		in.setLenient(false);
 		in.set(year, month, day);		
+		DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+		System.out.println("in = " +df.format(in.getTime()));
+		System.out.println("now = " +df.format(now.getTime()));
+		
 		if(in.after(now)) isFuture = true;		
 		return isFuture;
 	}

@@ -1,6 +1,8 @@
 package edu.unsw.comp9321.jdbc;
 
-import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 import java.util.Calendar;
@@ -34,10 +36,18 @@ public class VacancyQueryDTO {
 		int iMonth = Integer.parseInt(request.getParameter("inMonth"));
 		int iYear = Integer.parseInt(request.getParameter("inMonth"));
 		Calendar cIn = Calendar.getInstance();
+		cIn.setLenient(false);
+		cIn.set(iYear, iMonth, iDay);
+		this.checkIn = cIn.getTime();
 		// Checkout
 		int oDay = Integer.parseInt(request.getParameter("outDay"));
 		int oMonth = Integer.parseInt(request.getParameter("outMonth"));
 		int oYear = Integer.parseInt(request.getParameter("outMonth"));
+		Calendar cOut = Calendar.getInstance();
+		cOut.setLenient(false);
+		cOut.set(oYear, oMonth, oDay);
+		this.checkIn = cOut.getTime();		
+		
 	}
 
 	public VacancyQueryDTO(String city, Double maxPrice, Date checkIn,
@@ -99,5 +109,18 @@ public class VacancyQueryDTO {
 	public void setNumRooms(int rooms) {
 		this.numRooms = rooms;
 	}
+	
+	public String convertCheckInToString () {
+		DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+		String d = "'" + df.format(this.checkIn) + "'";
+		return d;
+	}
+	
+	public String convertCheckOutToString () {
+		DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+		String d = "'" + df.format(this.checkOut) + "'";
+		return d;
+	}
+	
 	
 }

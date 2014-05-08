@@ -14,7 +14,7 @@ public interface HotelDAO {
 	public ArrayList<VacancyQueryDTO> findVacantRooms (VacancyQueryDTO query);
 	
 	// or instead
-	public SearchResults customerRoomSearch (VacancyQueryDTO query);
+	public ArrayList<ArrayList<RoomDTO>> customerRoomSearch (VacancyQueryDTO query);
 	
 	public ArrayList<String> getCities ();
 	// Make booking

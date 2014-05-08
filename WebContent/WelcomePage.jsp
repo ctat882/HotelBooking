@@ -11,9 +11,12 @@
 </head>
 <body>
 
+<c:if test="${error eq 'true' }">
+	<c:out value="${msg}"></c:out>
+</c:if>
 <div style="width:1000px">
 
-	<form action='Contoller' method='POST'> 
+	<form action='Controller' method='POST'> 
 
 		<table style="border-collapse:collapse">
 			<tr style="text-align:center">
@@ -95,7 +98,8 @@
 		
 		<div style="text-align:center">
 			<br>	
-			<input  type="submit" name="action" value="Search"/>
+			<input  type="submit" name="submit" value="Search"/>
+			<input type="hidden" name="action" value="Search"/>
 		</div>
 		
 	</form>

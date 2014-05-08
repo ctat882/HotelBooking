@@ -2,11 +2,10 @@ package edu.unsw.comp9321.logic;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -93,14 +92,39 @@ public class Controller extends HttpServlet {
 		
 		String msg = validateInput(request);
 		if (msg.contentEquals("Valid")) {
-			String city = request.getParameter("city");
+			VacancyQueryDTO query = new VacancyQueryDTO(request);
+			ArrayList<ArrayList<RoomDTO>> results = hotels.customerRoomSearch(query);
+			if(results == null) {
+				msg = "Unfortunately there are no rooms available matching your "
+						+ "search criteria";
+				request.setAttribute("error", true);
+				request.setAttribute("msg", msg);
+				request.setAttribute("hotels", hotels.getCities());
+				nextPage = "WelcomePage.jsp";
+			}
+			else if (results.isEmpty()) {
+				request.setAttribute("error", true);
+				msg = "Unfortunately there are no rooms available matching your "
+						+ "search criteria";
+				request.setAttribute("msg", msg);
+				request.setAttribute("hotels", hotels.getCities());
+				nextPage = "WelcomePage.jsp";
+			}
+			else { // There are results
+				request.setAttribute("results",results);
+				nextPage = "SearchResults.jsp";
+			}
+			
+			
 		}
 		else {
+			request.setAttribute("error", true);
 			request.setAttribute("msg", msg);
+			request.setAttribute("hotels", hotels.getCities());
 			nextPage = "WelcomePage.jsp";
 		}
 		// Create dates
-		VacancyQueryDTO query = new VacancyQueryDTO();
+		
 		
 		return nextPage;
 		
@@ -113,21 +137,21 @@ public class Controller extends HttpServlet {
 		// Checkin
 		int iDay = Integer.parseInt(request.getParameter("inDay"));
 		int iMonth = Integer.parseInt(request.getParameter("inMonth"));
-		int iYear = Integer.parseInt(request.getParameter("inMonth"));
+		int iYear = Integer.parseInt(request.getParameter("inYear"));
 		// Checkout
 		int oDay = Integer.parseInt(request.getParameter("outDay"));
 		int oMonth = Integer.parseInt(request.getParameter("outMonth"));
-		int oYear = Integer.parseInt(request.getParameter("outMonth"));		
+		int oYear = Integer.parseInt(request.getParameter("outYear"));		
 		
 		// Input Validation		
 		String error = "";
 		InputValidator iV = new InputValidator();
 		
-		if (! iV.isValidDate(iDay, iMonth, iYear)) {
+		if (! iV.isValidDate(iDay, iMonth - 1, iYear)) {
 			error = "Incorrect check in date";
 			isInputValid = false;
 		}
-		else if (! iV.isValidDate(oDay, oMonth, oYear)) {
+		else if (! iV.isValidDate(oDay, oMonth - 1, oYear)) {
 			error = "Incorrect check out date";
 			isInputValid = false;
 		}
@@ -135,11 +159,11 @@ public class Controller extends HttpServlet {
 			error = "Cannot check in and out on the same day";
 			isInputValid = false;
 		}
-		else if (! iV.isCheckInDateInFuture(iDay, iMonth, iYear)) {
+		else if (! iV.isCheckInDateInFuture(iDay, iMonth - 1, iYear)) {
 			error = "Check in must be no earlier than today";
 			isInputValid = false;
 		}
-		else if (! iV.isCheckOutAfterIn(iDay, iMonth, iYear, oDay, oMonth, oYear)) {
+		else if (! iV.isCheckOutAfterIn(iDay, iMonth - 1, iYear, oDay, oMonth - 1, oYear)) {
 			error = "Check in must be before check out";
 			isInputValid = false;
 		}

@@ -3,11 +3,19 @@ package edu.unsw.comp9321.jdbc;
 import java.util.ArrayList;
 
 public class SearchResults {
-	private ArrayList<RoomDTO> single;
-	private ArrayList<RoomDTO> twin;
-	private ArrayList<RoomDTO> queen;
-	private ArrayList<RoomDTO> executive;
-	private ArrayList<RoomDTO> suite;
+	private ArrayList<ArrayList<RoomDTO>> results;
+	
+	public SearchResults () {
+		
+	}
+
+	public ArrayList<ArrayList<RoomDTO>> getResults() {
+		return results;
+	}
+
+	public void setResults(ArrayList<ArrayList<RoomDTO>> results) {
+		this.results = results;
+	}
 	
 //	private int discSingle
 	
