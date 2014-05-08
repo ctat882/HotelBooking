@@ -19,7 +19,7 @@ public class InputValidator {
 		Calendar cal = Calendar.getInstance();
 		cal.setLenient(false);
 		try {
-			cal.set(year, month - 1, day);
+			cal.set(year, month, day);
 		} catch (Exception e) {
 			valid = false;
 		}		
@@ -95,8 +95,8 @@ public class InputValidator {
 		Calendar now = Calendar.getInstance();
 		Calendar in = Calendar.getInstance();
 		in.setLenient(false);
-		in.set(year, month, day);		
-		DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+		in.set(year, month , day);		
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		System.out.println("in = " +df.format(in.getTime()));
 		System.out.println("now = " +df.format(now.getTime()));
 		

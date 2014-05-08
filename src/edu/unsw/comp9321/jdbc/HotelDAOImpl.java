@@ -4,9 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -39,7 +42,7 @@ public class HotelDAOImpl implements HotelDAO{
 	}
 
 	@Override
-	public ArrayList<ArrayList<RoomDTO>> customerRoomSearch(VacancyQueryDTO query) {
+	public SearchResults customerRoomSearch(VacancyQueryDTO query) {
 		
 		/** What to get from the database:
 			-> List of Rooms from hotel that are free
@@ -50,6 +53,7 @@ public class HotelDAOImpl implements HotelDAO{
 			-> Compute the price hikes and discounts
 			-> Determine results based on query (max spend)
 		*/
+		SearchResults results = null;
 		ArrayList<ArrayList<RoomDTO>> options = null;
 		ArrayList<RoomDTO> rooms = getAllRooms(query);
 		ArrayList<BookingDTO> bookings = getHotelBookings(query);
@@ -70,7 +74,7 @@ public class HotelDAOImpl implements HotelDAO{
 			// This way, can iterate over them side by side.
 			
 			boolean[] on_peak = new boolean[365];
-			dC.fillDaysOnPeak(on_peak, query.getCheckIn(), query.getCheckOut());
+			dC.fillDaysOnPeak(on_peak, query.getCheck_in(), query.getCheck_out());
 			int[] single_discount = new int[365];
 			int[] twin_discount = new int[365];
 			int[] queen_discount = new int[365];
@@ -142,10 +146,19 @@ public class HotelDAOImpl implements HotelDAO{
 			meetCriteria.put("Executive", false);
 			meetCriteria.put("Suite", false);
 			
+			HashMap<String,Double> highestPrice = new HashMap<String,Double>(8);
+			highestPrice.put("Single", 0.0);
+			highestPrice.put("Twin", 0.0);
+			highestPrice.put("Queen", 0.0);
+			highestPrice.put("Executive", 0.0);
+			highestPrice.put("Suite", 0.0);
+			
 			// check against financial constraint
 			for (String key : roomsAvail.keySet()) {
 				if(roomsAvail.get(key) > 0) {
-					double highest = dC.findHighestPrice(totals.get(key), query.getCheckIn(), query.getCheckOut());
+					double highest = dC.findHighestPrice(totals.get(key), query.getCheck_in(), query.getCheck_out());
+					System.out.println("Highest price for " + key + " is: " + highest);
+					highestPrice.put(key,highest);
 					if (highest <= query.getMaxPrice()) {
 						meetCriteria.put(key, true);
 					}
@@ -153,12 +166,28 @@ public class HotelDAOImpl implements HotelDAO{
 			}
 			
 			eliminateRoomsOnPrice(rooms,meetCriteria);
+			eliminateRoomsOnQuantity(rooms,query.getNumRooms());
+			for(RoomDTO r : rooms) {
+				r.setPrice(highestPrice.get(r.getSize()));
+			}
+			System.out.println("Number of rooms for search = " + rooms.size());
 			
+			options = new ArrayList<ArrayList<RoomDTO>>();
+			//TODO THIS NEEDS WORK!!! It will not give all combinations
+			for(int i = 0; i < rooms.size() - query.getNumRooms(); i++) {
+				ArrayList<RoomDTO> combo = new ArrayList<RoomDTO>();
+				for(int j = 0; j < query.getNumRooms(); j++) {
+					combo.add(rooms.get(i + j));
+				}
+				options.add(combo);
+			}
 			// now to check the combinations against the quantity of rooms requested
 			// PERMUTATIONS WITHOUT REPETITION, should be n! results (rooms.size() factorial).
 			
-			options = comb(rooms);
-//			SearchResults options = new SearchResults();
+
+			results = new SearchResults();
+			results.setResults(options);
+			results.setPrices(highestPrice);
 //			options.setResults(comb(rooms));
 			for(int i = 0; i < options.size(); i++) {
 				System.out.println("Option " + i);
@@ -170,7 +199,34 @@ public class HotelDAOImpl implements HotelDAO{
 			
 		}
 		
-		return options;
+		return results;
+	}
+	
+	private void eliminateRoomsOnQuantity(ArrayList<RoomDTO> rooms, int quantity) {
+		int single = 0,twin = 0,queen = 0,exec = 0,suite = 0;
+		
+		for(int i = rooms.size() - 1; i >= 0; i--) {
+			if (rooms.get(i).getSize().contentEquals("Single")) {
+				single++;
+				if (single > quantity) rooms.remove(i);				
+			}
+			else if (rooms.get(i).getSize().contentEquals("Twin")) {
+				twin++;
+				if (twin > quantity) rooms.remove(i);				
+			}
+			else if (rooms.get(i).getSize().contentEquals("Queen")) {
+				queen++;
+				if (queen > quantity) rooms.remove(i);				
+			}
+			else if (rooms.get(i).getSize().contentEquals("Executive")) {
+				exec++;
+				if (exec > quantity) rooms.remove(i);				
+			}
+			else if (rooms.get(i).getSize().contentEquals("Suite")) {
+				suite++;
+				if (suite > quantity) rooms.remove(i);				
+			}
+		}
 	}
 	
 	/**
@@ -184,100 +240,16 @@ public class HotelDAOImpl implements HotelDAO{
 			if (! meetCriteria.get(rooms.get(i).getSize())) {
 				rooms.remove(i);
 			}
-			else {
+//			else {
 				i--;
-			}
+//			}
 		}		
 	}
 	
 	
-	public static ArrayList<ArrayList<RoomDTO>> comb(ArrayList<RoomDTO> in)
-    {
-        ArrayList<ArrayList<RoomDTO>> out = new ArrayList<ArrayList<RoomDTO>>();
-         
-        for (int i = 0; i < Math.pow(2, in.size()); i ++)
-        {
-            ArrayList<RoomDTO> thing = new ArrayList<RoomDTO>();
-             
-            String t = Integer.toBinaryString(i);
-             
-            String zeroes = new String();
-            for (int o = 0; o < in.size(); o ++)
-            {
-                zeroes = zeroes + "0";
-            }
-             
-            DecimalFormat df = new DecimalFormat(zeroes);
-             
-            String s = df.format(Integer.parseInt(t));
-             
-            for (int j = 0; j < s.length(); j ++)
-            {
-                if (s.charAt(j) == new String("1").charAt(0))
-                {
-                    thing.add(in.get(j));                    
-                }
-                else
-                {
-                     
-                }
-            }
-             
-            out.add(thing);
-        }
-         
-//        for (int i = 0; i < out.size(); i ++)
-//        {
-//            ArrayList<ArrayList<RoomDTO>> permsOfOne = permutations(out.get(i));
-//             
-//            for (int j = 0; j <permsOfOne.size(); j ++)
-//            {
-//                for (int d = 0; d <permsOfOne.get(j).size(); d ++)
-//                {
-//                    System.out.print(permsOfOne.get(j).get(d).getName() + ", ");
-//                }
-//                 
-//                Strategy coolStrat = new Strategy(permsOfOne.get(j));
-//                System.out.print("Sensitivity is:" + coolStrat.getSens() + " Specificity is:" + coolStrat.getSpec() + " Cost is: " + coolStrat.getCost());
-//                 
-//                System.out.println("END");
-//            }
-//        }
-         
-        return out;
-    }
+
      
-    public static ArrayList<ArrayList<RoomDTO>> permutations(ArrayList<RoomDTO> list)
-    {
-        return permutations(null, list, null);
-    }
-     
-    public static ArrayList<ArrayList<RoomDTO>> permutations(ArrayList<RoomDTO> prefix, ArrayList<RoomDTO> suffix, ArrayList<ArrayList<RoomDTO>> output)
-    {
-        if(prefix == null)
-            prefix = new ArrayList<RoomDTO>();
-        if(output == null)
-            output = new ArrayList<ArrayList<RoomDTO>>();
-         
-        if(suffix.size() == 1)
-        {
-            ArrayList<RoomDTO> newElement = new ArrayList<RoomDTO>(prefix);
-            newElement.addAll(suffix);
-            output.add(newElement);
-            return output;
-        }
-         
-        for(int i = 0; i < suffix.size(); i++)
-        {
-            ArrayList<RoomDTO> newPrefix = new ArrayList<RoomDTO>(prefix);
-            newPrefix.add(suffix.get(i));
-            ArrayList<RoomDTO> newSuffix = new ArrayList<RoomDTO>(suffix);
-            newSuffix.remove(i);
-            permutations(newPrefix,newSuffix,output);
-        }
-         
-        return output;
-    }
+   
 	
 	
 	/**
@@ -316,9 +288,9 @@ public class HotelDAOImpl implements HotelDAO{
 						allDeleted = true;
 					}
 				}
-				else {
-					j--;
-				}
+				
+				j--;
+				
 			}
 			allDeleted = false;
 		}
@@ -370,13 +342,27 @@ public class HotelDAOImpl implements HotelDAO{
 									+ "AND d.end_date < ?";			
 			PreparedStatement discQuery = connection.prepareStatement(sqlQuery);
 			discQuery.setString(1, query.getCity());
-			discQuery.setString(2, query.convertCheckInToString());
-			discQuery.setString(3, query.convertCheckOutToString());
+//			discQuery.setString(2, "'"+ query.getCheck_in() + "'");
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(df.parse(query.getCheck_in()));
+			cal.add(Calendar.MONTH, -1);
+			java.sql.Date ci = new java.sql.Date(cal.getTime().getTime());
+			discQuery.setDate(2,ci);
+			
+			cal.clear();
+			cal.setTime(df.parse(query.getCheck_out()));
+			cal.add(Calendar.MONTH, -1);
+			java.sql.Date co = new java.sql.Date(cal.getTime().getTime());
+			discQuery.setDate(3,co);
+//			discQuery.setString(3, "'"+ query.getCheck_out() + "'");
 			ResultSet discRes = discQuery.executeQuery();
 			while(discRes.next()) {
 				DiscountDTO d = new DiscountDTO();
-				d.setStart_date(discRes.getDate("start_date"));
-				d.setEnd_date(discRes.getDate("end_date"));
+//				d.setStart_date(discRes.getDate("start_date"));
+				d.setStart(discRes.getString("start_date"));
+//				d.setEnd_date(discRes.getDate("end_date"));
+				d.setEnd(discRes.getString("end_date"));
 				d.setHotel(discRes.getInt("hotel"));
 				d.setId(discRes.getInt("discount_id"));				
 				d.setRoom_type(discRes.getString("size"));
@@ -406,15 +392,33 @@ public class HotelDAOImpl implements HotelDAO{
 								+ "WHERE h.city = ? "
 									+ "AND b.check_in >= ? "
 									+ "AND b.check_out < ?";
+			System.out.println(query.getCheck_in());
+			System.out.println(query.getCheck_out());
 			PreparedStatement bookingQuery = connection.prepareStatement(sqlQuery);
 			bookingQuery.setString(1, query.getCity());
-			bookingQuery.setString(2, query.convertCheckInToString());
-			bookingQuery.setString(3, query.convertCheckOutToString());
+//			bookingQuery.setString(2, "'"+ query.getCheck_in() + "'");
+//			bookingQuery.setDate(2, java.sql.Date.valueOf(query.getCheck_in()));
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(df.parse(query.getCheck_in()));
+			cal.add(Calendar.MONTH, -1);
+			java.sql.Date ci = new java.sql.Date(cal.getTime().getTime());
+			bookingQuery.setDate(2,ci);
+//			bookingQuery.setString(3, "'"+ query.getCheck_out() + "'") ;
+			
+			cal.clear();
+			cal.setTime(df.parse(query.getCheck_out()));
+			cal.add(Calendar.MONTH, -1);
+			java.sql.Date co = new java.sql.Date(cal.getTime().getTime());
+			bookingQuery.setDate(3,co);
+//			bookingQuery.setDate(3, java.sql.Date.valueOf(query.getCheck_out())) ;
 			ResultSet bookingRes = bookingQuery.executeQuery();
 			while(bookingRes.next()) {
 				BookingDTO b = new BookingDTO();
-				b.setCheck_in(bookingRes.getDate("check_in"));
-				b.setCheck_out(bookingRes.getDate("check_out"));
+//				b.setCheck_in(bookingRes.getDate("check_in"));
+//				b.setCheck_out(bookingRes.getDate("check_out"));
+				b.setCheckin(bookingRes.getString("check_in"));
+				b.setCheckout(bookingRes.getString("check_out"));
 				b.setHotel(bookingRes.getInt("hotel"));
 				b.setId(bookingRes.getInt("booking_id"));
 				b.setPin(bookingRes.getInt("pin"));

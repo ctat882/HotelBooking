@@ -16,6 +16,7 @@
 	<tr>
 		<c:forEach var="j" items="${i}">
 			<td><c:out value="${j.size}"/></td>
+			<td><c:out value="${j.price}"/></td>
 		</c:forEach>	
 	</tr>
 

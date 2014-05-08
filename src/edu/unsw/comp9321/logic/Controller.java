@@ -93,7 +93,8 @@ public class Controller extends HttpServlet {
 		String msg = validateInput(request);
 		if (msg.contentEquals("Valid")) {
 			VacancyQueryDTO query = new VacancyQueryDTO(request);
-			ArrayList<ArrayList<RoomDTO>> results = hotels.customerRoomSearch(query);
+			SearchResults sR = hotels.customerRoomSearch(query);
+			ArrayList<ArrayList<RoomDTO>> results = sR.getResults();
 			if(results == null) {
 				msg = "Unfortunately there are no rooms available matching your "
 						+ "search criteria";
