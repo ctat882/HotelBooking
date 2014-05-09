@@ -1,3 +1,5 @@
-DROP TABLE "USER".Bookings
+DROP TABLE "USER".Users;
+DROP TABLE "USER".Discounts;
+DROP TABLE "USER".Bookings;
 DROP TABLE "USER".Rooms;
 DROP TABLE "USER".Hotels;
