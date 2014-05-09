@@ -1,7 +1,5 @@
 package edu.unsw.comp9321.jdbc;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 

@@ -10,6 +10,86 @@
 <title>Checkout</title>
 </head>
 <body>
+<form action="Controller" method="post">
+	<table>
+		<c:set var="seen_single" value="false"/>
+		<c:set var="seen_twin" value="false"/>
+		<c:set var="seen_queen" value="false"/>
+		<c:set var="seen_exec" value="false"/>
+		<c:set var="seen_suite" value="false"/>
+		<c:forEach items="${booking}" var="b" >
+			
+			<c:if test="${b.size eq 'Single' }">
+				<c:if test="${seen_single eq 'false' }">
+					<tr>
+					<td>
+						<c:out value="${SingleCount}"/>
+					 	x Single Room = $
+					 	<c:out value="${SingleTotal}"/>
+				 	</td>
+				 	</tr>
+				 	<c:set var="seen_single" value="true"/>
+				</c:if>
+			</c:if>
+			<c:if test="${b.size eq 'Twin' }">
+				<c:if test="${seen_twin eq 'false' }">
+					<tr>
+					<td>
+						<c:out value="${TwinCount}"/>
+					 	x Twin Room = $
+					 	<c:out value="${TwinTotal}"/>
+				 	</td>
+				 	</tr>
+				 	<c:set var="seen_twin" value="true"/>
+				</c:if>
+			</c:if>
+			<c:if test="${b.size eq 'Queen' }">
+				<c:if test="${seen_queen eq 'false' }">
+					<tr>
+					<td>
+						<c:out value="${QueenCount}"/>
+					 	x Queen Room = $
+					 	<c:out value="${QueenTotal}"/>
+				 	</td>
+				 	</tr>
+				 	<c:set var="seen_queen" value="true"/>
+				</c:if>
+			</c:if>
+			<c:if test="${b.size eq 'Executive' }">
+				<c:if test="${seen_exec eq 'false' }">
+					<tr>
+					<td>
+						<c:out value="${ExecutiveCount}"/>
+					 	x Executive Room = $
+					 	<c:out value="${ExecutiveTotal}"/>
+				 	</td>
+				 	</tr>
+				 	<c:set var="seen_exec" value="true"/>
+				</c:if>
+			</c:if>
+			<c:if test="${b.size eq 'Suite' }">
+				<c:if test="${seen_suite eq 'false' }">
+					<tr>
+					<td>
+						<c:out value="${SuiteCount}"/>
+					 	x Suite Room = $
+					 	<c:out value="${SuiteTotal}"/>
+				 	</td>
+				 	</tr>
+				 	<c:set var="seen_suite" value="true"/>
+				</c:if>
+			</c:if>
+		</c:forEach>
+		<tr><td>TOTAL:<c:out value="${total}"></c:out></td></tr>
+		<tr><td>Email:<input type="text" name="email"/></td></tr>
+		<tr><td>Card#:<input type="text" name="cardnum"/></td></tr>
+		<tr><td><input type="submit" value="Proceed"/></td></tr>
+	
+	</table>
+</form>
+<form action="WelcomePage.jsp">
+	<input type="submit" value="Cancel"/>
+</form>
 
 </body>
 </html>

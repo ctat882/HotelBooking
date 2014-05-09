@@ -8,7 +8,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.logging.Logger;
 
 import edu.unsw.comp9321.logic.DateCalculator;
@@ -197,13 +196,12 @@ public class HotelDAOImpl implements HotelDAO{
 				arr[count] = r.getSize();
 				count++;
 			}
-			
-//			combinations2(arr,query.getNumRooms(),0,new String[query.getNumRooms()]);
-			
+
 			ArrayList<String[]> collect = new ArrayList<String[]>();
-			System.out.println("Combo1");
+			// Get String representation of all combinations
 			combinations1(arr,query.getNumRooms(),0,new String[query.getNumRooms()],collect);
-			System.out.println("CHANGE STARTS HERE");
+			// Remove all duplicate combinations
+//			System.out.println("CHANGE STARTS HERE");
 			for(int z = 0; z < collect.size() ; z++) {
 				if(collect.get(z) != null) {
 					String[] arr1 = collect.get(z);
@@ -220,32 +218,9 @@ public class HotelDAOImpl implements HotelDAO{
 						k++;
 					}
 				}
-			}
+			}			
 			
-			
-//			while ( z > 0) {
-//				String[] arr1 = collect.get(z);
-//				String s1 = Arrays.toString(arr1);
-//				System.out.println("S1 = " + s1);
-//				int k = z - 1;
-//				while (k >= 0) {
-//					String[] arrTemp = collect.get(k);
-//					String s2 = Arrays.toString(arrTemp);
-//					System.out.println("S2 = " + s2);
-//					if (s1.contentEquals(s2)) {
-//						collect.remove(k);
-//						z--;
-//					}
-//					k--;
-//				}				
-//				z--;
-//			}
-//			for (int z = 0; z < collect.size();z++) {
-//				if (!collect.get(z)[0].contentEquals("0"))
-//				System.out.println(Arrays.toString(collect.get(z)));
-//
-//			}
-			
+			// Combinations	
 			options = new ArrayList<ArrayList<RoomDTO>>();
 			
 			for (int y = 0; y < collect.size();y++) {
@@ -273,19 +248,7 @@ public class HotelDAOImpl implements HotelDAO{
 					}
 					options.add(combo);
 				}
-			}
-			
-			//TODO THIS NEEDS WORK!!! It will not give all combinations
-//			for(int i = 0; i <= rooms.size() - query.getNumRooms(); i++) {
-//				ArrayList<RoomDTO> combo = new ArrayList<RoomDTO>();
-//				for(int j = 0; j < query.getNumRooms(); j++) {
-//					combo.add(rooms.get(i + j));
-//				}
-//				options.add(combo);
-//			}
-			// now to check the combinations against the quantity of rooms requested
-			// PERMUTATIONS WITHOUT REPETITION, should be n! results (rooms.size() factorial).
-			
+			}					
 
 			results = new SearchResults();
 			results.setResults(options);
@@ -295,6 +258,8 @@ public class HotelDAOImpl implements HotelDAO{
 			results.setQueen_totals(qTotal);
 			results.setExecutive_totals(eTotal);
 			results.setSuite_totals(suiteTotal);
+			results.setCheckin(query.getCheck_in());
+			results.setCheckout(query.getCheck_out());
 //			options.setResults(comb(rooms));
 			for(int i = 0; i < options.size(); i++) {
 				System.out.println("Option " + i);
@@ -308,6 +273,7 @@ public class HotelDAOImpl implements HotelDAO{
 		
 		return results;
 	}
+	
 	
 	
 	static void combinations2(String[] arr, int len, int startPosition, String[] result){
@@ -324,11 +290,8 @@ public class HotelDAOImpl implements HotelDAO{
 	private void combinations1(String[] arr, int len, int startPosition, String[] result,ArrayList<String[]> collect){
         if (len == 0){        	
         	
-    		String[] temp = result.clone();
-        	
-        	collect.add(temp);
-//            System.out.println(Arrays.toString(result));
-            
+    		String[] temp = result.clone();        	
+        	collect.add(temp);            
             return;
         }       
         for (int i = startPosition; i <= arr.length-len; i++){
@@ -337,22 +300,7 @@ public class HotelDAOImpl implements HotelDAO{
         }
     }
 	
-	private ArrayList<ArrayList<RoomDTO>> getCombos (ArrayList<RoomDTO> rooms, HashMap<String,Integer> available, int required) {
-		ArrayList<ArrayList<RoomDTO>> combo = new ArrayList<ArrayList<RoomDTO>>();
-		
-		HashMap<Integer,String> id = new HashMap<Integer,String>(8);
-		id.put(0, "Single");
-		id.put(1, "Twin");
-		id.put(2, "Queen");
-		id.put(3, "Executive");
-		id.put(4, "Suite");
-		return combo;
-		
-		
-		
-		 
-	}
-	
+
 	private void eliminateRoomsOnQuantity(ArrayList<RoomDTO> rooms, int quantity) {
 		int single = 0,twin = 0,queen = 0,exec = 0,suite = 0;
 		

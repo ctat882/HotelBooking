@@ -23,7 +23,42 @@ public class DateCalculator {
 	
 	public DateCalculator(){};
 	
-	
+	public Double getTotalPrice(String checkin, String checkout,double[] totals) {
+		double total = 0.0;
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			Calendar start = Calendar.getInstance();
+			start.setTime(df.parse(checkin));
+			Calendar end = Calendar.getInstance();
+			end.setTime(df.parse(checkout));
+			GregorianCalendar greg = new GregorianCalendar();
+			int s = start.get(Calendar.DAY_OF_YEAR);
+			if (greg.isLeapYear(start.get(Calendar.YEAR))) s--;
+			int e = end.get(Calendar.DAY_OF_YEAR);
+			if (greg.isLeapYear(end.get(Calendar.YEAR))) e--;
+			
+			if (s < e) {		// Then standard calculation
+				//numNightsStay = checkOutDOY - checkInDOY;
+				for (int i = s - 1; i < e -1 ; i++) {
+					total += totals[i];
+				}
+			}
+			else {	// Wrap around
+				// = (dec31 - checkInDOY) + checkOutDOY;	//TODO probably -1 from checkout date
+				for (int i = jan01 - 1; i < e -1; i++) {
+					total += totals[i];
+				}
+				for (int i = s - 1; i < dec31; i++) {
+					total += totals[i];
+				}
+				
+			}
+			
+		}catch (Exception e) {
+			System.out.println("Parse exception");
+		}
+		return total;
+	}
 	
 	public double findHighestPrice (double[] totals, String check_in, String check_out) {
 		double max = 0.0;
@@ -53,14 +88,14 @@ public class DateCalculator {
 			
 			if (startDOY < endDOY) {		// Then standard calculation
 				//numNightsStay = checkOutDOY - checkInDOY;
-				for (int i = startDOY - 1; i < endDOY; i++) {
+				for (int i = startDOY - 1; i < endDOY - 1; i++) {
 					if (totals[i] > max) max = totals[i];	
 //					System.out.println("Price for DOY: "+ i + "is = $" +totals[i]);
 				}
 			}
 			else {	// Wrap around
 				// = (dec31 - checkInDOY) + checkOutDOY;	//TODO probably -1 from checkout date
-				for (int i = jan01 - 1; i < endDOY; i++) {
+				for (int i = jan01 - 1; i < endDOY - 1; i++) {
 					if (totals[i] > max) max = totals[i];
 				}
 				for (int i = startDOY - 1; i < dec31; i++) {
@@ -318,4 +353,8 @@ public class DateCalculator {
 		}		
 		return daysInPeak;
 	}
+
+
+
+	
 }

@@ -11,6 +11,8 @@ public class SearchResults {
 	private double[] queen_totals;
 	private double[] executive_totals;
 	private double[] suite_totals;
+	private String checkin;
+	private String checkout;
 	
 	public HashMap<String, Double> getPrices() {
 		return prices;
@@ -22,6 +24,24 @@ public class SearchResults {
 
 	public SearchResults () {
 		
+	}
+
+	
+	
+	public String getCheckin() {
+		return checkin;
+	}
+
+	public void setCheckin(String checkin) {
+		this.checkin = checkin;
+	}
+
+	public String getCheckout() {
+		return checkout;
+	}
+
+	public void setCheckout(String checkout) {
+		this.checkout = checkout;
 	}
 
 	public ArrayList<ArrayList<RoomDTO>> getResults() {

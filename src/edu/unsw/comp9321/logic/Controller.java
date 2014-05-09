@@ -3,6 +3,7 @@ package edu.unsw.comp9321.logic;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -91,13 +92,81 @@ public class Controller extends HttpServlet {
 		dispatcher.forward(request, response);
 	}
 	private String handleConfirm(HttpServletRequest request) {
-		String nextPage = "";
+		String nextPage = "Checkout.jsp";
 		CartBean cart = (CartBean) request.getSession().getAttribute("cart");
-		
+		int selection = Integer.parseInt(request.getParameter("choice"));
+		ArrayList<RoomDTO> booking = cart.getSearch().getResults().get(selection);
+		double total = calculateBookingTotal(booking,cart,request);
+		HashMap<String,Double> prices = cart.getSearch().getPrices();
+		request.setAttribute("total", total);
+		request.setAttribute("booking", booking);
+		for(String key : prices.keySet()) {
+			if (prices.get(key) > 0.0) request.setAttribute(key +"Total", prices.get(key));
+			if (prices.get(key) > 0.0) request.setAttribute(key +"Count",getRoomCount(booking,key));
+		}
 		
 		return nextPage;
 	}
 	
+	private int getRoomCount (ArrayList<RoomDTO> booking, String type) {
+		int num = 0;
+		for (RoomDTO r : booking) {
+			if (r.getSize().contentEquals(type)) num++;
+		}
+		return num;
+	}
+	
+	private double calculateBookingTotal(ArrayList<RoomDTO>booking,CartBean cart,HttpServletRequest request) {
+		double total = 0.0;
+		String checkin = cart.getSearch().getCheckin();
+		String checkout = cart.getSearch().getCheckout();
+		DateCalculator dC = new DateCalculator();
+		HashMap<String,Double> prices = new HashMap<String,Double>(8); 
+		prices.put("Single", 0.0);
+		prices.put("Twin", 0.0);
+		prices.put("Queen", 0.0);
+		prices.put("Executive", 0.0);
+		prices.put("Suite", 0.0);
+		// Get the number of each type of room
+		HashMap<String,Integer> numRoomTypes = new HashMap<String,Integer>(8);
+		numRoomTypes.put("Single", 0);
+		numRoomTypes.put("Twin", 0);
+		numRoomTypes.put("Queen", 0);
+		numRoomTypes.put("Executive", 0);
+		numRoomTypes.put("Suite", 0);
+		for(RoomDTO r : booking) {			
+			numRoomTypes.put(r.getSize(), numRoomTypes.get(r.getSize()) + 1);			
+		}
+		
+		if (numRoomTypes.get("Single") > 0) {
+			prices.put("Single",dC.getTotalPrice(checkin,checkout,cart.getSearch().getSingle_totals()));
+			prices.put("Single", prices.get("Single") * numRoomTypes.get("Single"));
+		}
+		if (numRoomTypes.get("Twin") > 0) {
+			prices.put("Twin",dC.getTotalPrice(checkin,checkout,cart.getSearch().getTwin_totals()));
+			prices.put("Twin", prices.get("Twin") * numRoomTypes.get("Twin"));
+		}
+		if (numRoomTypes.get("Queen") > 0) {
+			prices.put("Queen",dC.getTotalPrice(checkin,checkout,cart.getSearch().getQueen_totals()));
+			prices.put("Queen", prices.get("Queen") * numRoomTypes.get("Queen"));
+		}
+		if (numRoomTypes.get("Executive") > 0) {
+			prices.put("Executive",dC.getTotalPrice(checkin,checkout,cart.getSearch().getExecutive_totals()));
+			prices.put("Executive", prices.get("Executive") * numRoomTypes.get("Executive"));
+		}
+		if (numRoomTypes.get("Suite") > 0) {
+			prices.put("Suite",dC.getTotalPrice(checkin,checkout,cart.getSearch().getSuite_totals()));
+			prices.put("Suite", prices.get("Suite") * numRoomTypes.get("Suite"));
+		}
+		
+		for(String key : prices.keySet()) {
+			cart.getSearch().getPrices().put(key, prices.get(key));
+			total += prices.get(key);
+		}
+		
+		return total;
+		
+	}
 	private String handleSearch(HttpServletRequest request) {
 		String nextPage = "";
 		
@@ -128,6 +197,7 @@ public class Controller extends HttpServlet {
 					cart = new CartBean();
 				}
 				cart.setSearch(sR);
+				
 				request.setAttribute("results",results);
 				nextPage = "SearchResults.jsp";
 			}
@@ -149,8 +219,8 @@ public class Controller extends HttpServlet {
 
 	private String validateInput (HttpServletRequest request) {
 		boolean isInputValid = true;
-		double price = Double.parseDouble(request.getParameter("maxPrice"));
-		int quantity = Integer.parseInt(request.getParameter("numRooms"));
+		double price = -1;
+		int quantity = -1;
 		// Checkin
 		int iDay = Integer.parseInt(request.getParameter("inDay"));
 		int iMonth = Integer.parseInt(request.getParameter("inMonth"));
@@ -163,7 +233,21 @@ public class Controller extends HttpServlet {
 		// Input Validation		
 		String error = "";
 		InputValidator iV = new InputValidator();
+		if (request.getParameter("maxPrice") == null || request.getParameter("maxPrice").isEmpty()) {
+			error = "The max price cannot be empty";
+			isInputValid = false;
+		}
+		else {
+			 price = Double.parseDouble(request.getParameter("maxPrice"));
+		}
 		
+		if (request.getParameter("numRooms") == null || request.getParameter("numRooms").isEmpty()) {
+			error = "The number of rooms cannot be empty";
+			isInputValid = false;
+		}
+		else {
+			 quantity = Integer.parseInt(request.getParameter("numRooms"));
+		}
 		if (! iV.isValidDate(iDay, iMonth - 1, iYear)) {
 			error = "Incorrect check in date";
 			isInputValid = false;
