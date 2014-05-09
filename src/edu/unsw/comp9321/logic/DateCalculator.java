@@ -31,24 +31,31 @@ public class DateCalculator {
 		try {
 			Calendar start = Calendar.getInstance();
 			start.setTime(df.parse(check_in));
-			start.add(Calendar.MONTH, -1);
+//			start.add(Calendar.MONTH, -1);
 //			start.setTime(check_in);		
 			Calendar end = Calendar.getInstance();
 			end.setTime(df.parse(check_out));
-			end.add(Calendar.MONTH, -1);
+//			end.add(Calendar.MONTH, -1);
 //			end.setTime(check_out);
 			GregorianCalendar greg = new GregorianCalendar();
 			// If leap year subtract one day from Day Of Year
 			int startDOY = start.get(Calendar.DAY_OF_YEAR);
-			if (greg.isLeapYear(start.get(Calendar.YEAR))) startDOY--;		
+			if (greg.isLeapYear(start.get(Calendar.YEAR))) startDOY--;	
+//			System.out.println("StartDOY is" + startDOY);
+//			System.out.println("Check in date is" + start.get(Calendar.DATE));
+//			System.out.println("Check in month is" + start.get(Calendar.MONTH));
+//			System.out.println("Check in year is" + start.get(Calendar.YEAR));
 			int endDOY = end.get(Calendar.DAY_OF_YEAR);
 			if (greg.isLeapYear(end.get(Calendar.YEAR))) endDOY--;
 			
+//			System.out.println("Check in date is" + check_in);
+//			System.out.println("Check out date is" + check_out);
 			
 			if (startDOY < endDOY) {		// Then standard calculation
 				//numNightsStay = checkOutDOY - checkInDOY;
 				for (int i = startDOY - 1; i < endDOY; i++) {
-					if (totals[i] > max) max = totals[i];				
+					if (totals[i] > max) max = totals[i];	
+//					System.out.println("Price for DOY: "+ i + "is = $" +totals[i]);
 				}
 			}
 			else {	// Wrap around
@@ -80,11 +87,11 @@ public class DateCalculator {
 			Calendar start = Calendar.getInstance();
 	//		start.setTime(discount.getStart_date());	
 			start.setTime(df.parse(discount.getStart()));
-			start.add(Calendar.MONTH, -1);
+//			start.add(Calendar.MONTH, -1);
 			Calendar end = Calendar.getInstance();
 //			end.setTime(discount.getEnd_date());
 			end.setTime(df.parse(discount.getEnd()));
-			end.add(Calendar.MONTH, -1);
+//			end.add(Calendar.MONTH, -1);
 			GregorianCalendar greg = new GregorianCalendar();
 			// If leap year subtract one day from Day Of Year
 			int startDOY = start.get(Calendar.DAY_OF_YEAR);
@@ -125,47 +132,62 @@ public class DateCalculator {
 		try {
 			Calendar check_in = Calendar.getInstance();
 			check_in.setTime(df.parse(checkin));
-			check_in.add(Calendar.MONTH, -1);
+//			check_in.add(Calendar.MONTH, -1);
 			Calendar check_out = Calendar.getInstance();
 			check_out.setTime(df.parse(checkout));
-			check_out.add(Calendar.MONTH, -1);
+//			check_out.add(Calendar.MONTH, -1);
 		
-			GregorianCalendar greg = new GregorianCalendar();
+//			GregorianCalendar greg = new GregorianCalendar();
 			// If leap year subtract one day from Day Of Year
-			int checkInDOY = check_in.get(Calendar.DAY_OF_YEAR);
-			if (greg.isLeapYear(check_in.get(Calendar.YEAR))) checkInDOY--;		
-			int checkOutDOY = check_out.get(Calendar.DAY_OF_YEAR);
-			if (greg.isLeapYear(check_out.get(Calendar.YEAR))) checkOutDOY--;		
+//			int checkInDOY = check_in.get(Calendar.DAY_OF_YEAR);
+//			if (greg.isLeapYear(check_in.get(Calendar.YEAR))) checkInDOY--;		
+//			int checkOutDOY = check_out.get(Calendar.DAY_OF_YEAR);
+//			if (greg.isLeapYear(check_out.get(Calendar.YEAR))) checkOutDOY--;	
 			
-			//int numNightsStay;
-			if (checkInDOY < checkOutDOY) {		// Then standard calculation
-				//numNightsStay = checkOutDOY - checkInDOY;
-				for (int i = checkInDOY - 1; i < checkOutDOY; i++) {
-					if (i >= jan01 && i <= feb15) onPeak[i] = true;
-					else if (i >= mar25 && i <= apr14) onPeak[i] = true;
-					else if (i >= jul01 && i <= jul20) onPeak[i] = true;
-					else if (i >= sep20 && i <= oct10) onPeak[i] = true;
-					else if (i >= dec15 && i <= dec31) onPeak[i] = true;
-				}
+			for (int i = jan01 - 1; i < feb15; i++) {
+				onPeak[i] = true;
 			}
-			else {	// Wrap around
-				// = (dec31 - checkInDOY) + checkOutDOY;	//TODO probably -1 from checkout date
-				for (int i = jan01 - 1; i < checkOutDOY; i++) {
-					if (i >= jan01 && i <= feb15) onPeak[i] = true;
-					else if (i >= mar25 && i <= apr14) onPeak[i] = true;
-					else if (i >= jul01 && i <= jul20) onPeak[i] = true;
-					else if (i >= sep20 && i <= oct10) onPeak[i] = true;
-					else if (i >= dec15 && i <= dec31) onPeak[i] = true;
-				}
-				for (int i = checkInDOY - 1; i < dec31; i++) {
-					if (i >= jan01 && i <= feb15) onPeak[i] = true;
-					else if (i >= mar25 && i <= apr14) onPeak[i] = true;
-					else if (i >= jul01 && i <= jul20) onPeak[i] = true;
-					else if (i >= sep20 && i <= oct10) onPeak[i] = true;
-					else if (i >= dec15 && i <= dec31) onPeak[i] = true;
-				}
-				
-			}		
+			for (int i = mar25 - 1; i < apr14; i++) {
+				onPeak[i] = true;
+			}
+			for (int i = jul01 - 1; i < jul20; i++) {
+				onPeak[i] = true;
+			}
+			for (int i = sep20 - 1; i < oct10; i++) {
+				onPeak[i] = true;
+			}
+			for (int i = dec15 - 1; i < dec31; i++) {
+				onPeak[i] = true;
+			}
+//			//int numNightsStay;
+//			if (checkInDOY < checkOutDOY) {		// Then standard calculation
+//				//numNightsStay = checkOutDOY - checkInDOY;
+//				for (int i = checkInDOY - 1; i < checkOutDOY; i++) {
+//					if (i >= jan01 && i <= feb15) onPeak[i] = true;
+//					else if (i >= mar25 && i <= apr14) onPeak[i] = true;
+//					else if (i >= jul01 && i <= jul20) onPeak[i] = true;
+//					else if (i >= sep20 && i <= oct10) onPeak[i] = true;
+//					else if (i >= dec15 && i <= dec31) onPeak[i] = true;
+//				}
+//			}
+//			else {	// Wrap around
+//				// = (dec31 - checkInDOY) + checkOutDOY;	//TODO probably -1 from checkout date
+//				for (int i = jan01 - 1; i < checkOutDOY; i++) {
+//					if (i >= jan01 && i <= feb15) onPeak[i] = true;
+//					else if (i >= mar25 && i <= apr14) onPeak[i] = true;
+//					else if (i >= jul01 && i <= jul20) onPeak[i] = true;
+//					else if (i >= sep20 && i <= oct10) onPeak[i] = true;
+//					else if (i >= dec15 && i <= dec31) onPeak[i] = true;
+//				}
+//				for (int i = checkInDOY - 1; i < dec31; i++) {
+//					if (i >= jan01 && i <= feb15) onPeak[i] = true;
+//					else if (i >= mar25 && i <= apr14) onPeak[i] = true;
+//					else if (i >= jul01 && i <= jul20) onPeak[i] = true;
+//					else if (i >= sep20 && i <= oct10) onPeak[i] = true;
+//					else if (i >= dec15 && i <= dec31) onPeak[i] = true;
+//				}
+//				
+//			}		
 		} catch (Exception e) {
 			System.out.println("Parse exception");
 		}

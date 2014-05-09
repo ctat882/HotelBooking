@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -75,6 +76,10 @@ public class HotelDAOImpl implements HotelDAO{
 			
 			boolean[] on_peak = new boolean[365];
 			dC.fillDaysOnPeak(on_peak, query.getCheck_in(), query.getCheck_out());
+			if (on_peak[2]) {
+				System.out.println("Jan03 is on peak");
+			}
+			
 			int[] single_discount = new int[365];
 			int[] twin_discount = new int[365];
 			int[] queen_discount = new int[365];
@@ -103,9 +108,19 @@ public class HotelDAOImpl implements HotelDAO{
 			Arrays.fill(sTotal, 70.00);
 			calculateTotals(on_peak,single_discount,sTotal);
 			
+			
+			
+			
 			double[] tTotal = new double[365];
 			Arrays.fill(tTotal, 120.00);
 			calculateTotals(on_peak,twin_discount,tTotal);
+			
+			System.out.println("tTotal for Jul03 = $" + tTotal[184]);
+			System.out.println("tTotal for Jul02 = $" + tTotal[183]);
+			System.out.println("tTotal for Jul01 = $" + tTotal[182]);
+			System.out.println("tDiscount for Jul03 = $" + twin_discount[184]);
+			System.out.println("tDiscount for Jul02 = $" + twin_discount[183]);
+			System.out.println("tDiscount for Jul01 = $" + twin_discount[182]);
 			
 			double[] qTotal = new double[365];
 			Arrays.fill(qTotal, 120.00);
@@ -158,9 +173,11 @@ public class HotelDAOImpl implements HotelDAO{
 				if(roomsAvail.get(key) > 0) {
 					double highest = dC.findHighestPrice(totals.get(key), query.getCheck_in(), query.getCheck_out());
 					System.out.println("Highest price for " + key + " is: " + highest);
+					System.out.println("Rooms available as " + key + " is: " + roomsAvail.get(key));
 					highestPrice.put(key,highest);
 					if (highest <= query.getMaxPrice()) {
 						meetCriteria.put(key, true);
+						System.out.println("Room " + key + " is a match" );
 					}
 				}
 			}
@@ -174,7 +191,7 @@ public class HotelDAOImpl implements HotelDAO{
 			
 			options = new ArrayList<ArrayList<RoomDTO>>();
 			//TODO THIS NEEDS WORK!!! It will not give all combinations
-			for(int i = 0; i < rooms.size() - query.getNumRooms(); i++) {
+			for(int i = 0; i <= rooms.size() - query.getNumRooms(); i++) {
 				ArrayList<RoomDTO> combo = new ArrayList<RoomDTO>();
 				for(int j = 0; j < query.getNumRooms(); j++) {
 					combo.add(rooms.get(i + j));
@@ -265,10 +282,12 @@ public class HotelDAOImpl implements HotelDAO{
 			// add the peak hike of 40% 
 			if (peak[i]) {
 				total[i] += (total[i] *  0.4);
+//				System.out.print("Peak price of $" + total[i]);
 			}
 			// then apply discount
 			if (discount[i] > 0) {
-				total[i] = total[i] * (discount[i] / 100);
+				total[i] = total[i] * (((double)discount[i] )/ 100);
+				System.out.print("Discount applied, price is now $" + total[i]);
 			}
 		}
 	}
@@ -335,38 +354,50 @@ public class HotelDAOImpl implements HotelDAO{
 	public ArrayList<DiscountDTO> getHotelDiscounts (VacancyQueryDTO query) {
 		ArrayList<DiscountDTO> discounts = new ArrayList<DiscountDTO>();
 		try {
-			String sqlQuery = "SELECT * FROM Discounts d "		
-								+ "JOIN Hotels h ON d.hotel = h.id "
-								+ "WHERE h.city = ? "
-									+ "AND d.start_date >= ? "
-									+ "AND d.end_date < ?";			
-			PreparedStatement discQuery = connection.prepareStatement(sqlQuery);
-			discQuery.setString(1, query.getCity());
-//			discQuery.setString(2, "'"+ query.getCheck_in() + "'");
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(df.parse(query.getCheck_in()));
-			cal.add(Calendar.MONTH, -1);
-			java.sql.Date ci = new java.sql.Date(cal.getTime().getTime());
-			discQuery.setDate(2,ci);
+//			String sqlQuery = "SELECT * FROM Discounts d "		
+//								+ "JOIN Hotels h ON d.hotel = h.id "
+//								+ "WHERE h.city = ? "
+//									+ "AND (d.start_date BETWEEN DATE(?) AND DATE(?) "
+//										+ "OR d.end_date BETWEEN DATE(?) AND DATE(?))";		
 			
-			cal.clear();
-			cal.setTime(df.parse(query.getCheck_out()));
-			cal.add(Calendar.MONTH, -1);
-			java.sql.Date co = new java.sql.Date(cal.getTime().getTime());
-			discQuery.setDate(3,co);
-//			discQuery.setString(3, "'"+ query.getCheck_out() + "'");
-			ResultSet discRes = discQuery.executeQuery();
+			String sqlQuery = "SELECT * FROM Discounts d "		
+					+ "JOIN Hotels h ON d.hotel = h.id "
+					+ "WHERE h.city = '" + query.getCity() + "' "
+						+ "AND (d.start_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"') "
+							+ "OR d.end_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"'))";
+			Statement discQuery = connection.createStatement();
+//			PreparedStatement discQuery = connection.prepareStatement(sqlQuery);
+//			discQuery.setString(1, query.getCity());
+//			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//			Calendar cal = Calendar.getInstance();
+//			cal.setTime(df.parse(query.getCheck_in()));
+//			// d.start_date BETWEEN (start) AND (end)
+//			java.sql.Date ci = new java.sql.Date(cal.getTime().getTime());
+//			discQuery.setDate(2,ci);
+//			
+//			cal.clear();
+//			cal.setTime(df.parse(query.getCheck_out()));
+////			cal.add(Calendar.MONTH, -1);
+//			java.sql.Date co = new java.sql.Date(cal.getTime().getTime());
+//			discQuery.setDate(3,co);
+//			// d.end_date BETWEEN (start) AND (end)
+//			discQuery.setDate(4,ci);
+//			discQuery.setDate(5,co);
+//			ResultSet discRes = discQuery.executeQuery();
+			ResultSet discRes = discQuery.executeQuery(sqlQuery);
 			while(discRes.next()) {
 				DiscountDTO d = new DiscountDTO();
 //				d.setStart_date(discRes.getDate("start_date"));
 				d.setStart(discRes.getString("start_date"));
+				System.out.print("discount start = " + d.getStart());
 //				d.setEnd_date(discRes.getDate("end_date"));
 				d.setEnd(discRes.getString("end_date"));
+				System.out.print("discount end = " + d.getEnd());
 				d.setHotel(discRes.getInt("hotel"));
 				d.setId(discRes.getInt("discount_id"));				
-				d.setRoom_type(discRes.getString("size"));
-				d.setDiscount(discRes.getInt("discount"));				
+				d.setRoom_type(discRes.getString("room_type"));
+				d.setDiscount(discRes.getInt("discount"));
+				System.out.print("discount amount = " + d.getDiscount());
 				discounts.add(d);				
 			}
 			discRes.close();
@@ -389,34 +420,16 @@ public class HotelDAOImpl implements HotelDAO{
 		try {
 			String sqlQuery = "SELECT * FROM Bookings b "
 								+ "JOIN Hotels h ON b.hotel = h.id "
-								+ "WHERE h.city = ? "
-									+ "AND b.check_in >= ? "
-									+ "AND b.check_out < ?";
-			System.out.println(query.getCheck_in());
-			System.out.println(query.getCheck_out());
-			PreparedStatement bookingQuery = connection.prepareStatement(sqlQuery);
-			bookingQuery.setString(1, query.getCity());
-//			bookingQuery.setString(2, "'"+ query.getCheck_in() + "'");
-//			bookingQuery.setDate(2, java.sql.Date.valueOf(query.getCheck_in()));
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(df.parse(query.getCheck_in()));
-			cal.add(Calendar.MONTH, -1);
-			java.sql.Date ci = new java.sql.Date(cal.getTime().getTime());
-			bookingQuery.setDate(2,ci);
-//			bookingQuery.setString(3, "'"+ query.getCheck_out() + "'") ;
+								+ "WHERE h.city = '" + query.getCity() + "' "
+								+ "AND (d.start_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"') "
+									+ "OR d.end_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"'))";
+//			System.out.println(query.getCheck_in());
+//			System.out.println(query.getCheck_out());
+			Statement bookingQuery = connection.createStatement();
 			
-			cal.clear();
-			cal.setTime(df.parse(query.getCheck_out()));
-			cal.add(Calendar.MONTH, -1);
-			java.sql.Date co = new java.sql.Date(cal.getTime().getTime());
-			bookingQuery.setDate(3,co);
-//			bookingQuery.setDate(3, java.sql.Date.valueOf(query.getCheck_out())) ;
-			ResultSet bookingRes = bookingQuery.executeQuery();
+			ResultSet bookingRes = bookingQuery.executeQuery(sqlQuery);
 			while(bookingRes.next()) {
 				BookingDTO b = new BookingDTO();
-//				b.setCheck_in(bookingRes.getDate("check_in"));
-//				b.setCheck_out(bookingRes.getDate("check_out"));
 				b.setCheckin(bookingRes.getString("check_in"));
 				b.setCheckout(bookingRes.getString("check_out"));
 				b.setHotel(bookingRes.getInt("hotel"));
