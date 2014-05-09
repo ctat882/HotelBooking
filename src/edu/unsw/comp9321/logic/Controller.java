@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.unsw.comp9321.logic.CartBean;
 import edu.unsw.comp9321.common.ServiceLocatorException;
 import edu.unsw.comp9321.jdbc.*;
 
@@ -81,10 +82,20 @@ public class Controller extends HttpServlet {
 		else if (action.equals("Search")) {
 			nextPage = handleSearch(request);
 		}
+		else if (action.equals("Confirm")) {
+			nextPage = handleConfirm(request);
+		}
 		//TODO add Command pattern
 		
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/"+nextPage);
 		dispatcher.forward(request, response);
+	}
+	private String handleConfirm(HttpServletRequest request) {
+		String nextPage = "";
+		CartBean cart = (CartBean) request.getSession().getAttribute("cart");
+		
+		
+		return nextPage;
 	}
 	
 	private String handleSearch(HttpServletRequest request) {
@@ -112,6 +123,11 @@ public class Controller extends HttpServlet {
 				nextPage = "WelcomePage.jsp";
 			}
 			else { // There are results
+				CartBean cart = (CartBean) request.getSession().getAttribute("cart");
+				if (cart == null) {
+					cart = new CartBean();
+				}
+				cart.setSearch(sR);
 				request.setAttribute("results",results);
 				nextPage = "SearchResults.jsp";
 			}

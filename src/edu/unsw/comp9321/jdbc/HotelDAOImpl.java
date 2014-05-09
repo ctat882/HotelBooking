@@ -5,13 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import edu.unsw.comp9321.logic.DateCalculator;
@@ -76,9 +73,7 @@ public class HotelDAOImpl implements HotelDAO{
 			
 			boolean[] on_peak = new boolean[365];
 			dC.fillDaysOnPeak(on_peak, query.getCheck_in(), query.getCheck_out());
-			if (on_peak[2]) {
-				System.out.println("Jan03 is on peak");
-			}
+			
 			
 			int[] single_discount = new int[365];
 			int[] twin_discount = new int[365];
@@ -189,15 +184,105 @@ public class HotelDAOImpl implements HotelDAO{
 			}
 			System.out.println("Number of rooms for search = " + rooms.size());
 			
-			options = new ArrayList<ArrayList<RoomDTO>>();
-			//TODO THIS NEEDS WORK!!! It will not give all combinations
-			for(int i = 0; i <= rooms.size() - query.getNumRooms(); i++) {
-				ArrayList<RoomDTO> combo = new ArrayList<RoomDTO>();
-				for(int j = 0; j < query.getNumRooms(); j++) {
-					combo.add(rooms.get(i + j));
-				}
-				options.add(combo);
+			String[] arr = new String[rooms.size()];
+			int count = 0;
+			// recalculate the rooms available
+			roomsAvail.put("Single", 0);
+			roomsAvail.put("Twin", 0);
+			roomsAvail.put("Queen", 0);
+			roomsAvail.put("Executive", 0);
+			roomsAvail.put("Suite", 0);
+			for(RoomDTO r : rooms) {
+				roomsAvail.put(r.getSize(), roomsAvail.get(r.getSize()) + 1);
+				arr[count] = r.getSize();
+				count++;
 			}
+			
+//			combinations2(arr,query.getNumRooms(),0,new String[query.getNumRooms()]);
+			
+			ArrayList<String[]> collect = new ArrayList<String[]>();
+			System.out.println("Combo1");
+			combinations1(arr,query.getNumRooms(),0,new String[query.getNumRooms()],collect);
+			System.out.println("CHANGE STARTS HERE");
+			for(int z = 0; z < collect.size() ; z++) {
+				if(collect.get(z) != null) {
+					String[] arr1 = collect.get(z);
+					String s1 = Arrays.toString(arr1);
+					int k = z + 1;
+					while ( k < collect.size()) {
+						if (collect.get(k) != null) {
+							String[] arrTemp = collect.get(k);
+							String s2 = Arrays.toString(arrTemp);
+							if (s1.contentEquals(s2)) {
+								collect.get(k)[0] = "0";
+							}
+						}
+						k++;
+					}
+				}
+			}
+			
+			
+//			while ( z > 0) {
+//				String[] arr1 = collect.get(z);
+//				String s1 = Arrays.toString(arr1);
+//				System.out.println("S1 = " + s1);
+//				int k = z - 1;
+//				while (k >= 0) {
+//					String[] arrTemp = collect.get(k);
+//					String s2 = Arrays.toString(arrTemp);
+//					System.out.println("S2 = " + s2);
+//					if (s1.contentEquals(s2)) {
+//						collect.remove(k);
+//						z--;
+//					}
+//					k--;
+//				}				
+//				z--;
+//			}
+//			for (int z = 0; z < collect.size();z++) {
+//				if (!collect.get(z)[0].contentEquals("0"))
+//				System.out.println(Arrays.toString(collect.get(z)));
+//
+//			}
+			
+			options = new ArrayList<ArrayList<RoomDTO>>();
+			
+			for (int y = 0; y < collect.size();y++) {
+				
+				if (!collect.get(y)[0].contentEquals("0")) {
+					ArrayList<RoomDTO> combo = new ArrayList<RoomDTO>();
+					for(int j = 0; j < collect.get(y).length; j++) {
+						RoomDTO ro = new RoomDTO();
+						boolean found = false;
+						RoomDTO tempRoom;
+						int x = 0;
+						while(!found && x < rooms.size()) {
+							if (rooms.get(x).getSize().contentEquals(collect.get(y)[j])) {
+								found = true;
+								tempRoom = rooms.get(x);
+								ro.setAvailability(tempRoom.getAvailability());
+								ro.setHotel(tempRoom.getHotel());
+								ro.setPrice(tempRoom.getPrice());
+								ro.setRoom_num(tempRoom.getRoom_num());
+								ro.setSize(tempRoom.getSize());							
+							}
+							x++;
+						}
+						combo.add(ro);						
+					}
+					options.add(combo);
+				}
+			}
+			
+			//TODO THIS NEEDS WORK!!! It will not give all combinations
+//			for(int i = 0; i <= rooms.size() - query.getNumRooms(); i++) {
+//				ArrayList<RoomDTO> combo = new ArrayList<RoomDTO>();
+//				for(int j = 0; j < query.getNumRooms(); j++) {
+//					combo.add(rooms.get(i + j));
+//				}
+//				options.add(combo);
+//			}
 			// now to check the combinations against the quantity of rooms requested
 			// PERMUTATIONS WITHOUT REPETITION, should be n! results (rooms.size() factorial).
 			
@@ -205,6 +290,11 @@ public class HotelDAOImpl implements HotelDAO{
 			results = new SearchResults();
 			results.setResults(options);
 			results.setPrices(highestPrice);
+			results.setSingle_totals(sTotal);
+			results.setTwin_totals(tTotal);
+			results.setQueen_totals(qTotal);
+			results.setExecutive_totals(eTotal);
+			results.setSuite_totals(suiteTotal);
 //			options.setResults(comb(rooms));
 			for(int i = 0; i < options.size(); i++) {
 				System.out.println("Option " + i);
@@ -217,6 +307,50 @@ public class HotelDAOImpl implements HotelDAO{
 		}
 		
 		return results;
+	}
+	
+	
+	static void combinations2(String[] arr, int len, int startPosition, String[] result){
+        if (len == 0){
+            System.out.println(Arrays.toString(result));
+            return;
+        }       
+        for (int i = startPosition; i <= arr.length-len; i++){
+            result[result.length - len] = arr[i];
+            combinations2(arr, len-1, i+1, result);
+        }
+    }
+	
+	private void combinations1(String[] arr, int len, int startPosition, String[] result,ArrayList<String[]> collect){
+        if (len == 0){        	
+        	
+    		String[] temp = result.clone();
+        	
+        	collect.add(temp);
+//            System.out.println(Arrays.toString(result));
+            
+            return;
+        }       
+        for (int i = startPosition; i <= arr.length-len; i++){
+            result[result.length - len] = arr[i];
+            combinations1(arr, len-1, i+1, result,collect);
+        }
+    }
+	
+	private ArrayList<ArrayList<RoomDTO>> getCombos (ArrayList<RoomDTO> rooms, HashMap<String,Integer> available, int required) {
+		ArrayList<ArrayList<RoomDTO>> combo = new ArrayList<ArrayList<RoomDTO>>();
+		
+		HashMap<Integer,String> id = new HashMap<Integer,String>(8);
+		id.put(0, "Single");
+		id.put(1, "Twin");
+		id.put(2, "Queen");
+		id.put(3, "Executive");
+		id.put(4, "Suite");
+		return combo;
+		
+		
+		
+		 
 	}
 	
 	private void eliminateRoomsOnQuantity(ArrayList<RoomDTO> rooms, int quantity) {
@@ -354,11 +488,6 @@ public class HotelDAOImpl implements HotelDAO{
 	public ArrayList<DiscountDTO> getHotelDiscounts (VacancyQueryDTO query) {
 		ArrayList<DiscountDTO> discounts = new ArrayList<DiscountDTO>();
 		try {
-//			String sqlQuery = "SELECT * FROM Discounts d "		
-//								+ "JOIN Hotels h ON d.hotel = h.id "
-//								+ "WHERE h.city = ? "
-//									+ "AND (d.start_date BETWEEN DATE(?) AND DATE(?) "
-//										+ "OR d.end_date BETWEEN DATE(?) AND DATE(?))";		
 			
 			String sqlQuery = "SELECT * FROM Discounts d "		
 					+ "JOIN Hotels h ON d.hotel = h.id "
@@ -366,31 +495,12 @@ public class HotelDAOImpl implements HotelDAO{
 						+ "AND (d.start_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"') "
 							+ "OR d.end_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"'))";
 			Statement discQuery = connection.createStatement();
-//			PreparedStatement discQuery = connection.prepareStatement(sqlQuery);
-//			discQuery.setString(1, query.getCity());
-//			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-//			Calendar cal = Calendar.getInstance();
-//			cal.setTime(df.parse(query.getCheck_in()));
-//			// d.start_date BETWEEN (start) AND (end)
-//			java.sql.Date ci = new java.sql.Date(cal.getTime().getTime());
-//			discQuery.setDate(2,ci);
-//			
-//			cal.clear();
-//			cal.setTime(df.parse(query.getCheck_out()));
-////			cal.add(Calendar.MONTH, -1);
-//			java.sql.Date co = new java.sql.Date(cal.getTime().getTime());
-//			discQuery.setDate(3,co);
-//			// d.end_date BETWEEN (start) AND (end)
-//			discQuery.setDate(4,ci);
-//			discQuery.setDate(5,co);
-//			ResultSet discRes = discQuery.executeQuery();
+
 			ResultSet discRes = discQuery.executeQuery(sqlQuery);
 			while(discRes.next()) {
 				DiscountDTO d = new DiscountDTO();
-//				d.setStart_date(discRes.getDate("start_date"));
 				d.setStart(discRes.getString("start_date"));
 				System.out.print("discount start = " + d.getStart());
-//				d.setEnd_date(discRes.getDate("end_date"));
 				d.setEnd(discRes.getString("end_date"));
 				System.out.print("discount end = " + d.getEnd());
 				d.setHotel(discRes.getInt("hotel"));
@@ -421,12 +531,9 @@ public class HotelDAOImpl implements HotelDAO{
 			String sqlQuery = "SELECT * FROM Bookings b "
 								+ "JOIN Hotels h ON b.hotel = h.id "
 								+ "WHERE h.city = '" + query.getCity() + "' "
-								+ "AND (d.start_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"') "
-									+ "OR d.end_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"'))";
-//			System.out.println(query.getCheck_in());
-//			System.out.println(query.getCheck_out());
-			Statement bookingQuery = connection.createStatement();
-			
+								+ "AND (b.check_in BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"') "
+									+ "OR b.check_out BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"'))";
+			Statement bookingQuery = connection.createStatement();			
 			ResultSet bookingRes = bookingQuery.executeQuery(sqlQuery);
 			while(bookingRes.next()) {
 				BookingDTO b = new BookingDTO();
