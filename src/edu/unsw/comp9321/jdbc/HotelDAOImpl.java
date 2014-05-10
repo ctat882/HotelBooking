@@ -1,6 +1,7 @@
 package edu.unsw.comp9321.jdbc;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -375,25 +376,27 @@ public class HotelDAOImpl implements HotelDAO{
 	}
 		
 	private void eliminateRoomsOnBookings (ArrayList<RoomDTO> rooms, ArrayList<BookingDTO> bookings) {
-		boolean allDeleted = false;
-		int numRooms = 0;
+		
+//		int numRooms = 0;
+		
 		for(int i = 0; i < bookings.size(); i++) {
-			numRooms = bookings.get(i).getQuantity();
-			int deleted = 0;
+//			numRooms = bookings.get(i).getQuantity();
+//			int deleted = 0;
+			boolean allDeleted = false;
 			int j = rooms.size() - 1;
 			while(! allDeleted) {				
 				if(rooms.get(j).getSize().contentEquals(bookings.get(j).getSize())) {
 					rooms.remove(j);
-					deleted++;
-					if (deleted == numRooms) {
+//					deleted++;
+//					if (deleted == numRooms) {
 						allDeleted = true;
-					}
+//					}
 				}
 				
 				j--;
 				
 			}
-			allDeleted = false;
+//			allDeleted = false;
 		}
 	}
 	
@@ -492,7 +495,7 @@ public class HotelDAOImpl implements HotelDAO{
 				b.setPin(bookingRes.getInt("pin"));
 				b.setUrl(bookingRes.getString("url"));
 				b.setExtra_bed(bookingRes.getBoolean("extra_bed"));
-				b.setQuantity(bookingRes.getInt("quantity"));
+//				b.setQuantity(bookingRes.getInt("quantity"));
 				b.setSize(bookingRes.getString("size"));
 				bookings.add(b);				
 			}
@@ -524,6 +527,37 @@ public class HotelDAOImpl implements HotelDAO{
 			e.printStackTrace();
 		}
 		return cities;
+	}
+	@Override
+	public boolean makeBooking(ArrayList<RoomDTO> rooms, String checkin,
+			String checkout, String pin, String url, int extrabeds) {
+		
+		boolean success = false;
+		String sqlStmnt = "INSERT INTO BOOKINGS(booking_id,hotel, check_in, check_out, size, pin, url, extra_bed,assigned) "
+				 			+ "VALUES(DEFAULT,?,?,?,?,?,?,?,?)";
+		try {
+			PreparedStatement stmnt = connection.prepareStatement(sqlStmnt);
+			
+			for(int i = 0; i < rooms.size(); i++) {
+				stmnt.setInt(1, rooms.get(i).getHotel());		//hotel number
+				stmnt.setDate(2, Date.valueOf(checkin));		//checkin
+				stmnt.setDate(3, Date.valueOf(checkout));		//checkout
+				stmnt.setString(4, rooms.get(i).getSize());		//room size
+				stmnt.setInt(5,Integer.valueOf(pin));			//pin
+				stmnt.setString(6, url);						//Url
+				stmnt.setInt(7, extrabeds);						//Extra bed TODO fix this
+				stmnt.setString(8, "No");						//Assigned
+				stmnt.executeUpdate();
+			}
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return success;
 	}
 	
 

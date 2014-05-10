@@ -37,7 +37,7 @@
 
 </c:forEach>
 <tr><td><input type="submit" value="Confirm"/></td></tr>
-<tr><td><input type="hidden" name="action" value="Confirm"/></td></tr>
+<tr><td><input type="hidden" name="action" value="Checkout"/></td></tr>
 </table>
 </form>
 <form action="Welcome.jsp">

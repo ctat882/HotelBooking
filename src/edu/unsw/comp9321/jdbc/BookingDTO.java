@@ -8,7 +8,6 @@ public class BookingDTO {
 	private Date check_in;
 	private Date check_out;
 	private String size;
-	private int quantity;
 	private int pin;
 	private String url;
 	private boolean extra_bed;
@@ -43,7 +42,6 @@ public class BookingDTO {
 		this.check_in = check_in;
 		this.check_out = check_out;
 		this.size = size;
-		this.quantity = quantity;
 		this.pin = pin;
 		this.url = url;
 		this.extra_bed = extra_bed;
@@ -74,7 +72,6 @@ public class BookingDTO {
 		this.check_in = null;
 		this.check_out = null;
 		this.size = null;
-		this.quantity = 0;
 		this.pin = 0;
 		this.url = null;
 		this.extra_bed = false;				
@@ -111,12 +108,7 @@ public class BookingDTO {
 	public void setSize(String size) {
 		this.size = size;
 	}
-	public int getQuantity() {
-		return quantity;
-	}
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
+	
 	public int getPin() {
 		return pin;
 	}

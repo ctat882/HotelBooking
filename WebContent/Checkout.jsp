@@ -84,7 +84,7 @@
 		<tr><td>Email:<input type="text" name="email"/></td></tr>
 		<tr><td>Card#:<input type="text" name="cardnum"/></td></tr>
 		<tr><td><input type="submit" value="Proceed"/></td></tr>
-	
+		<tr><td><input type="hidden" name="action" value="Proceed"/></td></tr>
 	</table>
 </form>
 <form action="WelcomePage.jsp">

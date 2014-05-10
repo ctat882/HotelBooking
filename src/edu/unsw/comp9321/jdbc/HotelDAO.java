@@ -16,6 +16,8 @@ public interface HotelDAO {
 	// or instead
 	public SearchResults customerRoomSearch (VacancyQueryDTO query);
 	
+	public boolean makeBooking(ArrayList<RoomDTO> rooms, String checkin, String checkout, String pin, String url, int extrabeds);
+	
 	public ArrayList<String> getCities ();
 	// Make booking
 	//TODO create Booking object and parse as a parameter. (Change Object to BookingObject)

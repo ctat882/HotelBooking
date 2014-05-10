@@ -1,6 +1,8 @@
 package edu.unsw.comp9321.logic;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,10 +88,74 @@ public class Controller extends HttpServlet {
 		else if (action.equals("Confirm")) {
 			nextPage = handleConfirm(request);
 		}
+		else if (action.equals("Checkout")) {
+			nextPage = handleCheckout(request);
+		}
 		//TODO add Command pattern
 		
 		RequestDispatcher dispatcher = request.getRequestDispatcher("/"+nextPage);
 		dispatcher.forward(request, response);
+	}
+	
+	private String handleCheckout(HttpServletRequest request) {
+		String nextPage = "Checkout.jsp";
+		CartBean cart = (CartBean) request.getSession().getAttribute("cart");
+		// TODO 
+		// generate pin
+		// generate url
+		// generate 
+		
+		String pin = generatePin();
+		String url = generateUrl(cart.getSelection(),pin);
+		//TODO must sort out extra beds
+		hotels.makeBooking(cart.getSelection(), cart.getSearch().getCheckin(),
+				cart.getSearch().getCheckout(), pin, url, 0);
+		//TODO unfinished
+		return nextPage;
+		
+	}
+	
+	private String generateUrl (ArrayList<RoomDTO> booking, String pin) {
+		String url = "http://";
+		String server = "localhost:8080/Assign2/";
+		String unique = pin.hashCode() + String.valueOf(booking.hashCode());
+		
+		try {
+			MessageDigest mD = MessageDigest.getInstance("MD5");
+			byte[] msgBytes = unique.getBytes();
+			byte[] output = mD.digest(msgBytes);
+			unique = output.toString();
+			if (unique.length() > 50) {
+				unique = unique.substring(0, 49);
+			}
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		url += server + unique;
+		if (url.length() > 80) {
+			url = url.substring(0, 79);
+		}			
+		
+		return url;
+	}
+	
+	/**
+	 * Generate a random four digit number
+	 * @return
+	 */
+	private String generatePin() {
+		String pin = null;
+		InputValidator iV = new InputValidator();
+		boolean valid = false;
+		while (!valid) {
+			int minimum = 1000;
+			int maximum = 9999;
+			int rand = minimum +  (int)(Math.random()* ((maximum - minimum) + 1));
+			pin = String.valueOf(rand);
+			if (iV.isValidPin(pin)) valid = true;
+		}	
+		
+		return pin;
 	}
 	private String handleConfirm(HttpServletRequest request) {
 		String nextPage = "Checkout.jsp";
@@ -104,7 +170,7 @@ public class Controller extends HttpServlet {
 			if (prices.get(key) > 0.0) request.setAttribute(key +"Total", prices.get(key));
 			if (prices.get(key) > 0.0) request.setAttribute(key +"Count",getRoomCount(booking,key));
 		}
-		
+		cart.setSelection(booking);
 		return nextPage;
 	}
 	
