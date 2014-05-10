@@ -34,7 +34,7 @@ CREATE TABLE Bookings (
 	check_out		DATE NOT NULL,
 	size			VARCHAR(20) NOT NULL,
 	pin				INTEGER NOT NULL,
-	url				VARCHAR(30) NOT NULL,
+	url				VARCHAR(80) NOT NULL,
 	extra_bed		INTEGER DEFAULT 0,
 	assigned		VARCHAR(5) NOT NULL,
 	assignedroom	INTEGER,
