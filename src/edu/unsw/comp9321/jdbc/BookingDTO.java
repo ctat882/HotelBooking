@@ -17,6 +17,8 @@ public class BookingDTO {
 	private String assigned;
 	// Assigned Room Number
 	private int assignedRoom;
+	private String check_in;
+	private String check_out;
 	
 	public BookingDTO(int id, int hotel, String hotelLoc, Date check_in, Date check_out, String size, int quantity, int pin, String url, boolean extra_bed, String assigned, int assignedRoom){
 		this.id = id;
@@ -51,6 +53,30 @@ public class BookingDTO {
 	}
 	
 	
+	public String getCheck_in() {
+		return check_in;
+	}
+
+
+
+	public void setCheck_in(String check_in) {
+		this.check_in = check_in;
+	}
+
+
+
+	public String getCheck_out() {
+		return check_out;
+	}
+
+
+
+	public void setCheck_out(String check_out) {
+		this.check_out = check_out;
+	}
+
+
+
 	public int getId() {
 		return id;
 	}

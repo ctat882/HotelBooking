@@ -47,9 +47,17 @@ public class InputValidator {
 	 * @return True if the email is valid, false otherwise.
 	 */
 	public boolean isValidEmail (String email) {
+
 		boolean valid = false;
-		//TODO
+
+		if(email != null && ! email.isEmpty()) {
+
+			if(email.matches("^[a-zA-Z0-9_]+[@][a-zA-Z0-9.]+$")) valid = true;
+
+		}
+
 		return valid;
+
 	}
 	
 	/**
@@ -156,6 +164,33 @@ public class InputValidator {
 		}catch(Exception e){
 			return false;
 		}
+	}
+	
+	public boolean isValidPin (String pin) {
+
+		boolean valid = false;
+
+		if(pin != null && ! pin.isEmpty()) {
+
+			if(pin.matches("^[0-9][0-9][0-9][0-9]$")) valid = true;
+
+		}
+
+		return valid;
+
+	}
+	public boolean isValidNumbers (String numbers) {
+
+		boolean valid = false;
+
+		if(numbers != null && ! numbers.isEmpty()) {
+
+			if(numbers.matches("^[0-9]+$")) valid = true;
+
+		}
+
+		return valid;
+
 	}
 }
 

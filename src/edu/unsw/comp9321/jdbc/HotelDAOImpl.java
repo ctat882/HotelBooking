@@ -488,8 +488,8 @@ public class HotelDAOImpl implements HotelDAO{
 			ResultSet bookingRes = bookingQuery.executeQuery(sqlQuery);
 			while(bookingRes.next()) {
 				BookingDTO b = new BookingDTO();
-				b.setCheckin(bookingRes.getString("check_in"));
-				b.setCheckout(bookingRes.getString("check_out"));
+				b.setCheck_in(bookingRes.getString("check_in"));
+				b.setCheck_out(bookingRes.getString("check_out"));
 				b.setHotel(bookingRes.getInt("hotel"));
 				b.setId(bookingRes.getInt("booking_id"));
 				b.setPin(bookingRes.getInt("pin"));
