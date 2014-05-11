@@ -30,13 +30,13 @@
 					<tr style="text-align:center">
 						<td style="padding-left: 20px">${item.hotelLocation}</td>
 						 <td style="padding-left: 20px">${item.roomType}</td>
-						 <td style="padding-left: 20px"><select name="startDay${count}">
 						 
-						 <c:forEach begin="1" end="31" var="val">						 
-   							  <option value="${val}">${val}</option>
-						</c:forEach>		
-										
+						 <td style="padding-left: 20px"><select name="startDay${count}">						 
+							 <c:forEach begin="1" end="31" var="val">						 
+	   							  <option value="${val}">${val}</option>
+							</c:forEach>												
 						 </select></td>
+						 
 						 <td><select name="startMonth${count}">
 							    <option value="01">January</option>
 							    <option value="02">February</option>

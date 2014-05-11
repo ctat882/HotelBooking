@@ -2,6 +2,7 @@
     pageEncoding="ISO-8859-1"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ page session="true" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -10,18 +11,23 @@
 </head>
 <body>
 
-	<c:choose>
-  		<c:when test="${discountAdded == 'true'}">
-  			<p align="center">	
-				All Discount(s) added successfully!		
-			</p>
-  		</c:when>
-  		<c:when test="${discountAdded == 'false'}">
-  			<p align="center">
-  				1 or more Discount(s) NOT added!
-  			</p>
-  		</c:when>
-  	</c:choose>
+<c:choose>
+    <c:when test="${sessionScope.discountAdded == 'true'}">
+        <p align="center">  
+            All Discount(s) added successfully!     
+        </p>
+    </c:when>
+    <c:when test="${sessionScope.discountAdded == 'false'}">
+        <p align="center">
+            Error Found! No Discounts added!
+        </p>
+    </c:when>
+</c:choose>
+
+
+
+
+
 			
 	<br>
 	<form action='HotelOwnerController' method='POST' style="text-align:center">
