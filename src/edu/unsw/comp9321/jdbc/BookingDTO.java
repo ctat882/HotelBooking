@@ -5,9 +5,11 @@ import java.sql.Date;
 public class BookingDTO {
 	private int id;
 	private int hotel;
-	private Date check_in;
-	private Date check_out;
+	String hotelLoc;	
+	private Date checkIn;
+	private Date checkOut;
 	private String size;
+	private int quantity;
 	private int pin;
 	private String url;
 	private boolean extra_bed;
@@ -16,65 +18,36 @@ public class BookingDTO {
 	// Assigned Room Number
 	private int assignedRoom;
 	
-	private String checkin;
-	private String checkout;
-	
-	
-	public String getCheckin() {
-		return checkin;
-	}
-
-	public void setCheckin(String checkin) {
-		this.checkin = checkin;
-	}
-
-	public String getCheckout() {
-		return checkout;
-	}
-
-	public void setCheckout(String checkout) {
-		this.checkout = checkout;
-	}
-
-	public BookingDTO(int id, int hotel, Date check_in, Date check_out, String size, int quantity, int pin, String url, boolean extra_bed, String assigned, int assignedRoom){
+	public BookingDTO(int id, int hotel, String hotelLoc, Date check_in, Date check_out, String size, int quantity, int pin, String url, boolean extra_bed, String assigned, int assignedRoom){
 		this.id = id;
 		this.hotel = hotel;
-		this.check_in = check_in;
-		this.check_out = check_out;
+		this.hotelLoc = hotelLoc;
+		this.checkIn = check_in;
+		this.checkOut = check_out;
 		this.size = size;
+		this.quantity = quantity;
 		this.pin = pin;
 		this.url = url;
 		this.extra_bed = extra_bed;
 		this.assigned = assigned;
 		this.assignedRoom = assignedRoom;
 	}
-	
-	public String getAssigned() {
-		return assigned;
-	}
-	
-	public void setAssigned(String assigned) {
-		this.assigned = assigned;
-	}
 
-	public int getAssignedRoom() {
-		return assignedRoom;
-	}
-
-	public void setAssignedRoom(int assignedRoom) {
-		this.assignedRoom = assignedRoom;
-	}
 	
 	
 	public BookingDTO() {
 		this.id = 0;
 		this.hotel = 0;
-		this.check_in = null;
-		this.check_out = null;
+		this.hotelLoc = "";
+		this.checkIn = null;
+		this.checkOut = null;
 		this.size = null;
+		this.quantity = 0;
 		this.pin = 0;
 		this.url = null;
-		this.extra_bed = false;				
+		this.extra_bed = false;	
+		this.assigned = "";
+		this.assignedRoom = 0;
 	}
 	
 	
@@ -90,17 +63,26 @@ public class BookingDTO {
 	public void setHotel(int hotel) {
 		this.hotel = hotel;
 	}
-	public Date getCheck_in() {
-		return check_in;
+	
+	//public String getHotelLoc() {
+	//	return hotelLoc;
+	//}
+
+	//public void setHotelLoc(String hotelLoc) {
+	//	this.hotelLoc = hotelLoc;
+	//}
+	
+	public Date getCheckIn() {
+		return checkIn;
 	}
-	public void setCheck_in(Date check_in) {
-		this.check_in = check_in;
+	public void setCheckIn(Date check_in) {
+		this.checkIn = check_in;
 	}
-	public Date getCheck_out() {
-		return check_out;
+	public Date getCheckOut() {
+		return checkOut;
 	}
-	public void setCheck_out(Date check_out) {
-		this.check_out = check_out;
+	public void setCheckOut(Date check_out) {
+		this.checkOut = check_out;
 	}
 	public String getSize() {
 		return size;
@@ -108,7 +90,12 @@ public class BookingDTO {
 	public void setSize(String size) {
 		this.size = size;
 	}
-	
+	public int getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
 	public int getPin() {
 		return pin;
 	}
@@ -126,6 +113,23 @@ public class BookingDTO {
 	}
 	public void setExtra_bed(boolean extra_bed) {
 		this.extra_bed = extra_bed;
+	}
+	
+	
+	public String getAssigned() {
+		return assigned;
+	}
+	
+	public void setAssigned(String assigned) {
+		this.assigned = assigned;
+	}
+
+	public int getAssignedRoom() {
+		return assignedRoom;
+	}
+
+	public void setAssignedRoom(int assignedRoom) {
+		this.assignedRoom = assignedRoom;
 	}
 	
 }

@@ -7,11 +7,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpSession;
+
 import edu.unsw.comp9321.common.ServiceLocatorException;
 
 public class UserDAOImpl implements UserDAO {
 	
-	static Logger logger = Logger.getLogger(HotelOwnerDAOImpl.class.getName());
+	static Logger logger = Logger.getLogger(HotelOccupancyDAOImpl.class.getName());
 	private Connection connection;
 	
 	public UserDAOImpl() throws ServiceLocatorException, SQLException{
@@ -44,7 +46,6 @@ public class UserDAOImpl implements UserDAO {
 			e.printStackTrace();
 		}
 		
-		
 		// Get password for entered username
 		String passwordCorrUsername = "";
 		try{
@@ -60,65 +61,37 @@ public class UserDAOImpl implements UserDAO {
 			e.printStackTrace();
 		}
 		
-		// Get hotelID for entered username
-		int hotelIDdCorrUsername = 0;
+		// Get hotelID for entered username	
+		int hotelIDCorrUsername = getUserHotelId(username);
+		user.setUserHotelId(hotelIDCorrUsername);
+		
+		// if the password entered corresponds to the user's password 
+		// 								AND
+		// the hotel branch trying to be accessed is the hotel branch managed by the user
+		// 							then return TRUE
+		if (password.equals(passwordCorrUsername) && hotelIDCorrHotelLoc == hotelIDCorrUsername){
+			return true;
+		}
+		else 
+			return false;
+	}
+
+	public int getUserHotelId(String username){
+		
+		int hotelIDCorrUsername = 0;
 		try{
 			Statement stmnt = connection.createStatement();
 			String query = "SELECT HOTEL_ID FROM USERS WHERE USERNAME = " + "'" + username + "'";
 			ResultSet res = stmnt.executeQuery(query);
 			if (res.next()){
-				hotelIDdCorrUsername = res.getInt(1);
+				hotelIDCorrUsername = res.getInt(1);			
 			}			
 			stmnt.close();
 		}catch(Exception e){
 			System.out.println("Caught Exception");
 			e.printStackTrace();
 		}
-		
-		System.out.println("username = " +username);
-		System.out.println("password = " +password);
-		System.out.println("hotelLoc = " +hotelLoc);
-		
-		
-		System.out.println("passwordCorrUsername = " +passwordCorrUsername);
-		System.out.println("hotelIDCorrHotelLoc = " +hotelIDCorrHotelLoc);
-		System.out.println("hotelIDdCorrUsername = " +hotelIDdCorrUsername);
-		
-		// if the password entered corresponds to the user's password 
-		// AND
-		// the hotel branch trying to be accessed is indeed the hotel branch managed by the user
-		// then return TRUE
-		if (password.equals(passwordCorrUsername) && hotelIDCorrHotelLoc == hotelIDdCorrUsername){
-			return true;
-		}
-		else 
-			return false;
-			
-		
-		
-	}
-
-	@Override
-	public ArrayList<String> getHotelLoc() {
-		ArrayList<String> hotelLoc = new ArrayList<String>();
-		try{
-		Statement stmnt = connection.createStatement();
-		String query = "SELECT CITY FROM HOTELS";
-		
-		ResultSet res = stmnt.executeQuery(query);
-		
-		while (res.next()){
-			hotelLoc.add(res.getString(1));			
-		}
-		
-		stmnt.close();
- 		}catch(Exception e){
-			System.out.println("Caught Exception");
-			e.printStackTrace();
-		}
-		
-		
-		return hotelLoc;
+		return hotelIDCorrUsername;
 	}
 	
 	

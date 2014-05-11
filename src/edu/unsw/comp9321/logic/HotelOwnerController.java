@@ -16,23 +16,22 @@ import java.util.logging.Logger;
 import edu.unsw.comp9321.common.ServiceLocatorException;
 import edu.unsw.comp9321.jdbc.DiscountDAO;
 import edu.unsw.comp9321.jdbc.DiscountDAOImpl;
-import edu.unsw.comp9321.jdbc.DiscountDTO;
 import edu.unsw.comp9321.jdbc.DiscountDTOGiri;
-import edu.unsw.comp9321.jdbc.HotelOwnerDAO;
-import edu.unsw.comp9321.jdbc.HotelOwnerDAOImpl;
+import edu.unsw.comp9321.jdbc.HotelOccupancyDAO;
+import edu.unsw.comp9321.jdbc.HotelOccupancyDAOImpl;
 
 
 public class HotelOwnerController extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 	static Logger logger = Logger.getLogger(HotelOwnerController.class.getName());
 	
-	private HotelOwnerDAO hotelOwner;
+	private HotelOccupancyDAO hotelOwner;
 	private DiscountDAO discountInfo;
 	
 	public HotelOwnerController() throws ServletException{	
 		super();
 		try{
-			hotelOwner = new HotelOwnerDAOImpl();
+			hotelOwner = new HotelOccupancyDAOImpl();
 			discountInfo = new DiscountDAOImpl();
 		} catch (ServiceLocatorException e) {
 			logger.severe("Trouble connecting to database "+e.getStackTrace());
@@ -53,6 +52,10 @@ public class HotelOwnerController extends HttpServlet{
 	}
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		
+		HttpSession session = request.getSession();
+		
 		String action = request.getParameter("action");
 		System.out.println("action = " + action);
 		String forwardPage = "";
@@ -70,25 +73,38 @@ public class HotelOwnerController extends HttpServlet{
 			forwardPage = "DiscountServlet";				
 		}
 		// Add Start/End Date and Discount Amount information
-		else if(action.equals("Update Discount(s)")){			
-			forwardPage = "Confirm.jsp";
+		else if(action.equals("Update Discount(s)")){
+					
+			String discountError = (String) session.getAttribute("discountError");
+			
+			if (discountError.equals("true")){
+				session.setAttribute("discountAdded", "false");
+				forwardPage = "DiscountEnd.jsp";
+				
+			}
+			else if (discountError.equals("false")){
+				session.setAttribute("discountAdded", "true");
+				forwardPage = "Confirm.jsp";				
+			}
+			
+			
 		}
 		// Finalize discount
 		else if(action.equals("Confirm Discount(s)")){
 			// Save the discounts to the database
-			HttpSession session = request.getSession();
+			
 			ArrayList<DiscountDTOGiri> discountInfoFull = (ArrayList<DiscountDTOGiri>) session.getAttribute("discountInfo");
 			
-			// Check to see whether there were any failures in adding Discounts to the database
-			Boolean discountAdded = discountInfo.setDiscount(discountInfoFull);
-			if (discountAdded){
-				request.setAttribute("discountAdded", "true");
+			// Set Discounts
+			Boolean discountError = discountInfo.setDiscount(discountInfoFull);
+			
+			if (discountError){
+				session.setAttribute("discountAdded", "false");
 			}
 			else{
-				request.setAttribute("discountAdded", "false");
+				session.setAttribute("discountAdded", "true");
 			}
-			//Invalidate Session
-			session.invalidate();			
+				
 			forwardPage = "DiscountEnd.jsp";
 			
 		}

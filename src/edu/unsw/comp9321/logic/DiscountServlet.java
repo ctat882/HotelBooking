@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import edu.unsw.comp9321.jdbc.DiscountDTO;
 import edu.unsw.comp9321.jdbc.DiscountDTOGiri;
 
 public class DiscountServlet extends HttpServlet{	
@@ -22,6 +21,7 @@ public class DiscountServlet extends HttpServlet{
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
 		
 		String action = request.getParameter("action");
 		
@@ -65,9 +65,14 @@ public class DiscountServlet extends HttpServlet{
 		}
 		
 		//  ********************************    Add Start/End Date and Discount amount to discountInfo  *********************************************************
-		else if (action.equals("Update Discount(s)")){
-			int counter = 0;
+		else if (action.equals("Update Discount(s)")){			
+
+			InputValidator valid = new InputValidator();
+			HttpSession session = request.getSession();
 			
+			session.setAttribute("discountError", "false");
+			
+			int counter = 0;			
 			
 			while (request.getParameterMap().containsKey("id" + counter)){
 			
@@ -93,25 +98,30 @@ public class DiscountServlet extends HttpServlet{
 				
 				// If disallowed value is entered for discount, discount is set to 0;
 				Double discount = 0.00;
+				Boolean isDiscountValid = false;
 				try{
 					discount= Double.parseDouble(discountString);
-				}catch(Exception e){
+					if (discount > 0 && discount <= 100)
+						isDiscountValid = true;
+				}catch(Exception e){					
 					System.out.println("Caught Exception");					
 				}
 				
 				
-				System.out.println("startDay = " +startDay);
-				System.out.println("startMonth = " +startMonth);
-				System.out.println("startYear = " +startYear);
+				// Is Discount Start Day equal to, or after today
+				Boolean isDiscountStartValid = valid.dateIsAfterPresent(startDay, startMonth, startYear);
+				// Is Discount End Day equal to, or after today
+				Boolean isDiscountEndValid = valid.dateIsAfterPresent(endDay, endMonth, endYear);
+				// Is "Discount Start" Before "Discount End"
+				Boolean isDiscountStartBeforeEnd = valid.isDateABeforeDateB(startDay, startMonth, startYear, endDay, endMonth, endYear);
+				// Is Discount Start Day a valid Date
+				Boolean isStartDateValid = valid.isDateValid(startDay, startMonth, startYear);
+				// Is Discount End Day a valid Date
+				Boolean isEndDateValid = valid.isDateValid(endDay, endMonth, endYear);
 				
-				System.out.println("endDay = " +endDay);
-				System.out.println("endMonth = " +endMonth);
-				System.out.println("endYear = " +endYear);
-				
-				System.out.println("discount = " +discount);
+		
 				
 				
-				HttpSession session = request.getSession();
 				// Add the additional discount information into "discountInfo"
 				ArrayList<DiscountDTOGiri> discountInfo = (ArrayList<DiscountDTOGiri>) session.getAttribute("discountInfo");
 					
@@ -129,6 +139,10 @@ public class DiscountServlet extends HttpServlet{
 				discountInfo.get(counter).setDiscount(discount);
 				
 				++counter;
+	
+				if (!isDiscountValid || !isDiscountStartValid || !isDiscountEndValid || !isDiscountStartBeforeEnd || !isStartDateValid || !isEndDateValid){
+					session.setAttribute("discountError", "true");					
+				}
 			}
 			nextPage = "HotelOwnerController";
 		}

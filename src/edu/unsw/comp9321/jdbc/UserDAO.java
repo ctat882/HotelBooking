@@ -4,7 +4,5 @@ import java.util.ArrayList;
 
 public interface UserDAO {
 	// Verify user login details
-	Boolean verifyLogin(UserDTO user);
-	// Retrieve List of Hotel Locations
-	ArrayList<String> getHotelLoc();
+	Boolean verifyLogin(UserDTO user);	
 }
