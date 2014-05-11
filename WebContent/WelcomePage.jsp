@@ -12,7 +12,9 @@
 <body>
 
 <c:if test="${error eq 'true' }">
+	<font color="red">
 	<c:out value="${msg}"></c:out>
+	</font>
 </c:if>
 <div style="width:1000px">
 
