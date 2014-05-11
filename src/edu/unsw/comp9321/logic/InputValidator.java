@@ -1,5 +1,7 @@
 package edu.unsw.comp9321.logic;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
 
@@ -88,19 +90,73 @@ public class InputValidator {
 		return isAfter;
 	}
 	
-	public boolean isValidPin (String pin) {
-		boolean valid = false;
-		if(pin.matches("^[0-9][0-9][0-9][0-9]$")) valid = true;
-		return valid;
-	}
-	
 	public boolean isCheckInDateInFuture (int day, int month, int year) {
 		boolean isFuture = false;
 		Calendar now = Calendar.getInstance();
 		Calendar in = Calendar.getInstance();
 		in.setLenient(false);
-		in.set(year, month , day);
+		in.set(year, month , day);		
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+		System.out.println("in = " +df.format(in.getTime()));
+		System.out.println("now = " +df.format(now.getTime()));
+		
 		if(in.after(now)) isFuture = true;		
 		return isFuture;
 	}
+	
+	public boolean dateIsAfterPresent (int day, int month, int year){
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(year, month-1, day);
+		Date bookingStartDate = calendar.getTime();
+		
+		// Get today's date
+		Calendar c = Calendar.getInstance();
+		c.set(Calendar.HOUR, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		
+		Date todayDate = c.getTime();
+				
+		if (bookingStartDate.after(todayDate) || bookingStartDate.equals(todayDate)){
+			return true;
+		}
+		else
+			return false;
+		
+	}
+	public boolean isDateABeforeDateB (int dayA, int monthA, int yearA, int dayB, int monthB, int yearB){
+		Calendar calendarA = Calendar.getInstance();
+		calendarA.set(yearA, monthA-1, dayA);
+		Date dateA = calendarA.getTime();
+		
+		
+		Calendar calendarB = Calendar.getInstance();
+		calendarB.set(yearB, monthB-1, dayB);
+		Date dateB = calendarB.getTime();
+		
+		if (dateA.before(dateB) || dateA.equals(dateB)){
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	
+	// Is the input Date Valid?
+	// E.g 31/06/2014 is not a valid date
+	public boolean isDateValid (int day, int month, int year){
+		Calendar calendar = Calendar.getInstance();		
+		calendar.setLenient(false);
+		calendar.set(year, month-1, day);
+		
+		try{
+			Date date = calendar.getTime();			
+			return true;
+		}catch(Exception e){
+			return false;
+		}
+	}
 }
+
+
