@@ -39,13 +39,13 @@ public class DateCalculator {
 			
 			if (s < e) {		// Then standard calculation
 				//numNightsStay = checkOutDOY - checkInDOY;
-				for (int i = s - 1; i < e -1 ; i++) {
+				for (int i = s - 1; i < e -2 ; i++) {
 					total += totals[i];
 				}
 			}
 			else {	// Wrap around
 				// = (dec31 - checkInDOY) + checkOutDOY;	//TODO probably -1 from checkout date
-				for (int i = jan01 - 1; i < e -1; i++) {
+				for (int i = jan01 - 1; i < e -2; i++) {
 					total += totals[i];
 				}
 				for (int i = s - 1; i < dec31; i++) {

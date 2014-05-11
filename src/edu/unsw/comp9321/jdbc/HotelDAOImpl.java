@@ -82,6 +82,8 @@ public class HotelDAOImpl implements HotelDAO{
 			int[] suite_discount = new int[365];		
 			 
 			for (DiscountDTO disc : discounts) {
+				System.out.println("DISCOUNT room: " + disc.getRoom_type() + " amount: " +disc.getDiscount() 
+						+ " check in string: " + disc.getStart());
 				if (disc.getRoom_type().contentEquals("Single")) {
 					dC.fillDiscountDays(single_discount, disc);
 				}
@@ -110,13 +112,7 @@ public class HotelDAOImpl implements HotelDAO{
 			Arrays.fill(tTotal, 120.00);
 			calculateTotals(on_peak,twin_discount,tTotal);
 			
-			System.out.println("tTotal for Jul03 = $" + tTotal[184]);
-			System.out.println("tTotal for Jul02 = $" + tTotal[183]);
-			System.out.println("tTotal for Jul01 = $" + tTotal[182]);
-			System.out.println("tDiscount for Jul03 = $" + twin_discount[184]);
-			System.out.println("tDiscount for Jul02 = $" + twin_discount[183]);
-			System.out.println("tDiscount for Jul01 = $" + twin_discount[182]);
-			
+		
 			double[] qTotal = new double[365];
 			Arrays.fill(qTotal, 120.00);
 			calculateTotals(on_peak,queen_discount,qTotal);
@@ -369,7 +365,7 @@ public class HotelDAOImpl implements HotelDAO{
 			}
 			// then apply discount
 			if (discount[i] > 0) {
-				total[i] = total[i] * (((double)discount[i] )/ 100);
+				total[i] -= total[i] * (((double)discount[i] )/ 100);
 				System.out.print("Discount applied, price is now $" + total[i]);
 			}
 		}
@@ -377,27 +373,18 @@ public class HotelDAOImpl implements HotelDAO{
 		
 	private void eliminateRoomsOnBookings (ArrayList<RoomDTO> rooms, ArrayList<BookingDTO> bookings) {
 		
-//		int numRooms = 0;
-		
-		for(int i = 0; i < bookings.size(); i++) {
-//			numRooms = bookings.get(i).getQuantity();
-//			int deleted = 0;
-			boolean allDeleted = false;
-			int j = rooms.size() - 1;
-			while(! allDeleted) {				
-				if(rooms.get(j).getSize().contentEquals(bookings.get(j).getSize())) {
+		for (int i = 0; i <bookings.size();i++) {
+			boolean deleted = false;
+			int j = 0;
+			while(!deleted) {
+				if(rooms.get(j).getSize().contentEquals(bookings.get(i).getSize())) {
 					rooms.remove(j);
-//					deleted++;
-//					if (deleted == numRooms) {
-						allDeleted = true;
-//					}
+					deleted = true;
 				}
-				
-				j--;
-				
 			}
-//			allDeleted = false;
 		}
+		
+				
 	}
 	
 	/**
@@ -420,6 +407,7 @@ public class HotelDAOImpl implements HotelDAO{
 				r.setPrice(allRoomRes.getDouble("price"));
 				r.setRoom_num(allRoomRes.getInt("room_num"));
 				r.setSize(allRoomRes.getString("size"));
+				r.setHotel(allRoomRes.getInt("hotel"));
 				rooms.add(r);
 			}
 			allRoomRes.close();
@@ -443,8 +431,11 @@ public class HotelDAOImpl implements HotelDAO{
 			String sqlQuery = "SELECT * FROM Discounts d "		
 					+ "JOIN Hotels h ON d.hotel = h.id "
 					+ "WHERE h.city = '" + query.getCity() + "' "
-						+ "AND (d.start_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"') "
-							+ "OR d.end_date BETWEEN DATE('" + query.getCheck_in()+"') AND DATE('"+ query.getCheck_out() +"'))";
+						+ "AND (((DATE('" + query.getCheck_in()+"') BETWEEN d.start_date AND d.end_date)"
+							+ "OR (DATE('" + query.getCheck_in()+"') BETWEEN d.start_date AND d.end_date)))";
+			
+		
+				
 			Statement discQuery = connection.createStatement();
 
 			ResultSet discRes = discQuery.executeQuery(sqlQuery);
@@ -539,6 +530,7 @@ public class HotelDAOImpl implements HotelDAO{
 			PreparedStatement stmnt = connection.prepareStatement(sqlStmnt);
 			
 			for(int i = 0; i < rooms.size(); i++) {
+				System.out.println("hotel id = "+rooms.get(i).getHotel());
 				stmnt.setInt(1, rooms.get(i).getHotel());		//hotel number
 				stmnt.setDate(2, Date.valueOf(checkin));		//checkin
 				stmnt.setDate(3, Date.valueOf(checkout));		//checkout

@@ -1,12 +1,16 @@
 package edu.unsw.comp9321.logic;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Properties;
+import javax.servlet.*;
+import javax.mail.*;
+import javax.mail.internet.*;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -15,7 +19,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
+
+
 import edu.unsw.comp9321.logic.CartBean;
+import edu.unsw.comp9321.mail.SmtpAuthenticator;
 import edu.unsw.comp9321.common.ServiceLocatorException;
 import edu.unsw.comp9321.jdbc.*;
 
@@ -76,6 +84,7 @@ public class Controller extends HttpServlet {
 		 * "Checkout"
 		 * "Remove"
 		 */
+//		sendMail(request,response);
 		String action = request.getParameter("action");
 		String nextPage = "";
 		if (action == null) {
@@ -85,11 +94,11 @@ public class Controller extends HttpServlet {
 		else if (action.equals("Search")) {
 			nextPage = handleSearch(request);
 		}
-		else if (action.equals("Confirm")) {
+		else if (action.equals("Checkout")) {
 			nextPage = handleConfirm(request);
 		}
-		else if (action.equals("Checkout")) {
-			nextPage = handleCheckout(request);
+		else if (action.equals("Proceed")) {
+			nextPage = handleCheckout(request,response);
 		}
 		//TODO add Command pattern
 		
@@ -97,22 +106,119 @@ public class Controller extends HttpServlet {
 		dispatcher.forward(request, response);
 	}
 	
-	private String handleCheckout(HttpServletRequest request) {
+	private String handleCheckout(HttpServletRequest request, HttpServletResponse response) {
 		String nextPage = "Checkout.jsp";
 		CartBean cart = (CartBean) request.getSession().getAttribute("cart");
-		// TODO 
-		// generate pin
-		// generate url
-		// generate 
-		
-		String pin = generatePin();
-		String url = generateUrl(cart.getSelection(),pin);
-		//TODO must sort out extra beds
-		hotels.makeBooking(cart.getSelection(), cart.getSearch().getCheckin(),
-				cart.getSearch().getCheckout(), pin, url, 0);
+		// Validate input
+		String msg = validateCheckoutInput(request);
+		if (msg.contentEquals("Valid")) {
+	
+			// TODO 
+			// Email 
+			
+			String pin = generatePin();
+			String url = generateUrl(cart.getSelection(),pin);
+			//TODO must sort out extra beds
+			if (hotels.makeBooking(cart.getSelection(), cart.getSearch().getCheckin(),
+					cart.getSearch().getCheckout(), pin, url, 0)) {
+				
+				//TODO send email. Should create a thread for this
+				try {
+					sendMail(request,response);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		else {
+			request.setAttribute("error", true);
+			request.setAttribute("msg", msg);
+			nextPage = "Checkout.jsp";
+		}
 		//TODO unfinished
 		return nextPage;
 		
+	}
+	
+	private void sendMail (HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+		 // Recipient's email ID needs to be mentioned.
+	      String to = "ctattam@gmail.com";
+	 
+	      // Sender's email ID needs to be mentioned
+	      String from = "corey_tattam@hotmail.com";
+	 
+	      // Assuming you are sending email from localhost
+	      String host = "smtp.cse.unsw.edu.au";
+	 
+	      // Get system properties
+	      Properties properties = System.getProperties();
+	 
+	      // Setup mail server
+	      properties.setProperty("mail.smtp.host", host);
+	      properties.setProperty("mail.smtp.user", "ctat882");
+	      properties.setProperty("mail.user", "ctat882");
+	      properties.setProperty("password", "loki2586");
+	      properties.setProperty("mail.smtp.password", "loki2586");
+	      properties.setProperty("mail.password", "loki2586");
+	      properties.setProperty("mail.smtp.port", "587");
+	      properties.setProperty("mail.smtp.auth","true");
+	      properties.setProperty("mail.smtp.starttls.enable","true");
+	      
+	      SmtpAuthenticator authentication = new SmtpAuthenticator();
+	      
+	      // Get the default Session object.
+	      Session session = Session.getDefaultInstance(properties,authentication);
+	      
+		  // Set response content type
+	      response.setContentType("text/html");
+	      PrintWriter out = response.getWriter();
+
+	      try{
+	         // Create a default MimeMessage object.
+	         MimeMessage message = new MimeMessage(session);
+	         // Set From: header field of the header.
+	         message.setFrom(new InternetAddress(from));
+	         // Set To: header field of the header.
+	         message.addRecipient(Message.RecipientType.TO,
+	                                  new InternetAddress(to));
+	         // Set Subject: header field
+	         message.setSubject("This is the Subject Line!");
+	         // Now set the actual message
+	         message.setText("This is actual message");
+	         // Send message
+	         System.out.println("Just before Transport.send");
+	         Transport.send(message);
+	         System.out.println("Just after Transport.send");
+	         String title = "Send Email";
+	         String res = "Sent message successfully....";
+	         String docType =
+	         "<!doctype html public \"-//w3c//dtd html 4.0 " +
+	         "transitional//en\">\n";
+	         out.println(docType +
+	         "<html>\n" +
+	         "<head><title>" + title + "</title></head>\n" +
+	         "<body bgcolor=\"#f0f0f0\">\n" +
+	         "<h1 align=\"center\">" + title + "</h1>\n" +
+	         "<p align=\"center\">" + res + "</p>\n" +
+	         "</body></html>");
+	      }catch (Exception mex) {
+	         mex.printStackTrace();
+	      }
+	}
+	
+	private String validateCheckoutInput(HttpServletRequest request) {
+		String msg = "Valid";
+		InputValidator vC = new InputValidator();
+		if(! vC.isValidEmail(request.getParameter("email"))) {
+			msg = "Invalid email address";
+		}
+		else if (! vC.isValidNumbers(request.getParameter("cardnum"))) {
+			msg = "Invalid credit card number";
+		}
+		
+		return msg;
 	}
 	
 	private String generateUrl (ArrayList<RoomDTO> booking, String pin) {
@@ -236,7 +342,7 @@ public class Controller extends HttpServlet {
 	private String handleSearch(HttpServletRequest request) {
 		String nextPage = "";
 		
-		String msg = validateInput(request);
+		String msg = validateSearchInput(request);
 		if (msg.contentEquals("Valid")) {
 			VacancyQueryDTO query = new VacancyQueryDTO(request);
 			SearchResults sR = hotels.customerRoomSearch(query);
@@ -283,7 +389,7 @@ public class Controller extends HttpServlet {
 		
 	}
 
-	private String validateInput (HttpServletRequest request) {
+	private String validateSearchInput (HttpServletRequest request) {
 		boolean isInputValid = true;
 		double price = -1;
 		int quantity = -1;
