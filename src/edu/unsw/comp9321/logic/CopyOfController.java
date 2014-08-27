@@ -36,13 +36,13 @@ import edu.unsw.comp9321.jdbc.*;
  * Servlet implementation class Controller
  */
 @WebServlet("/Controller")
-public class Controller extends HttpServlet {
+public class CopyOfController extends HttpServlet {
 	private static final long serialVersionUID = 1L;    
 	private HotelDAO hotels;
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public Controller() {
+    public CopyOfController() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -272,15 +272,39 @@ public class Controller extends HttpServlet {
 	private String handleConfirm(HttpServletRequest request) {
 		String nextPage = "Checkout.jsp";
 		CartBean cart = (CartBean) request.getSession().getAttribute("cart");
-		HashMap<String,Double> prices = cart.getSearch().getPrices();
 		int selection = Integer.parseInt(request.getParameter("choice"));
 		// This is for jmeter testing
 		ArrayList<RoomDTO> booking;
-		
+		if(selection == 6) {
+			booking  = new ArrayList<RoomDTO>();
+			RoomDTO twin = new RoomDTO();
+			RoomDTO queen = new RoomDTO();
+			
+			twin.setAvailability("Available");
+			twin.setHotel(1);
+			twin.setPrice(999.99);
+			twin.setSize("Twin");
+			twin.setRoom_num(new Random().nextInt(16));
+			
+			queen.setAvailability("Available");
+			queen.setHotel(1);
+			queen.setPrice(999.99);
+			queen.setSize("Queen");
+			queen.setRoom_num(new Random().nextInt(16));
+			
+			booking.add(twin);
+			booking.add(queen);
+			request.setAttribute("total", 9999);
+			request.setAttribute("booking", booking);
+			request.setAttribute("Twin Total",9999);
+			request.setAttribute("Queen Total",9999);
+			
+		}
+		else {
 //			ArrayList<RoomDTO> booking = cart.getSearch().getResults().get(selection);
 			booking = cart.getSearch().getResults().get(selection);
 			double total = calculateBookingTotal(booking,cart,request);
-			
+			HashMap<String,Double> prices = cart.getSearch().getPrices();
 			request.setAttribute("total", total);
 			request.setAttribute("booking", booking);
 			for(String key : prices.keySet()) {
@@ -288,7 +312,7 @@ public class Controller extends HttpServlet {
 				if (prices.get(key) > 0.0) request.setAttribute(key +"Count",getRoomCount(booking,key));
 			}
 			cart.setSelection(booking);
-		
+		}
 		
 //		
 		

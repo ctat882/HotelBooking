@@ -53,8 +53,11 @@ public class HotelDAOImpl implements HotelDAO{
 		*/
 		SearchResults results = null;
 		ArrayList<ArrayList<RoomDTO>> options = null;
+		System.out.println("getting rooms");
 		ArrayList<RoomDTO> rooms = getAllRooms(query);
+		System.out.println("getting bookings");
 		ArrayList<BookingDTO> bookings = getHotelBookings(query);
+		System.out.println("getting discounts");
 		ArrayList<DiscountDTO> discounts =getHotelDiscounts(query);
 					
 		// TODO some function here that determines how many rooms
@@ -62,8 +65,11 @@ public class HotelDAOImpl implements HotelDAO{
 		// of rooms needed by first getting the discounts
 		// and then removing all rooms that don't fit the financial
 		// criteria of the query
-		
-		eliminateRoomsOnBookings(rooms,bookings);
+		System.out.println("eliminate rooms on bookings");
+		if (bookings != null && !bookings.isEmpty()) {
+			eliminateRoomsOnBookings(rooms,bookings);
+		}
+		System.out.println("finished eliminating rooms");
 		if (rooms.size() >= query.getNumRooms()) {				
 			
 			// Determine peak days
@@ -80,7 +86,7 @@ public class HotelDAOImpl implements HotelDAO{
 			int[] queen_discount = new int[365];
 			int[] exec_discount = new int[365];
 			int[] suite_discount = new int[365];		
-			 
+			System.out.println("filling discounts");
 			for (DiscountDTO disc : discounts) {
 				System.out.println("DISCOUNT room: " + disc.getRoom_type() + " amount: " +disc.getDiscount() 
 						+ " check in string: " + disc.getStart());
@@ -100,7 +106,7 @@ public class HotelDAOImpl implements HotelDAO{
 					dC.fillDiscountDays(suite_discount, disc);
 				}			
 			}
-			
+			System.out.println("calculating totals");
 			double[] sTotal = new double[365];
 			Arrays.fill(sTotal, 70.00);
 			calculateTotals(on_peak,single_discount,sTotal);
@@ -381,6 +387,7 @@ public class HotelDAOImpl implements HotelDAO{
 					rooms.remove(j);
 					deleted = true;
 				}
+				j++;
 			}
 		}
 		
@@ -524,10 +531,12 @@ public class HotelDAOImpl implements HotelDAO{
 			String checkout, String pin, String url, int extrabeds) {
 		
 		boolean success = false;
+		System.out.println("checkin date make booking = " + checkin);
 		String sqlStmnt = "INSERT INTO BOOKINGS(booking_id,hotel, check_in, check_out, size, pin, url, extra_bed,assigned) "
 				 			+ "VALUES(DEFAULT,?,?,?,?,?,?,?,?)";
+		int bookingCount = 0;
 		try {
-			PreparedStatement stmnt = connection.prepareStatement(sqlStmnt);
+			/*PreparedStatement stmnt = connection.prepareStatement(sqlStmnt);
 			
 			for(int i = 0; i < rooms.size(); i++) {
 				System.out.println("hotel id = "+rooms.get(i).getHotel());
@@ -539,10 +548,30 @@ public class HotelDAOImpl implements HotelDAO{
 				stmnt.setString(6, url);						//Url
 				stmnt.setInt(7, extrabeds);						//Extra bed TODO fix this
 				stmnt.setString(8, "No");						//Assigned
-				stmnt.executeUpdate();
+				bookingCount += stmnt.executeUpdate();
+			}
+			if (bookingCount == rooms.size()) {
+				success = true;
+			}*/
+			
+			Statement stmnt = connection.createStatement();
+			for(int i = 0; i < rooms.size(); i++) {
+				String insert = "INSERT INTO BOOKINGS(booking_id,hotel, check_in, check_out, size, pin, url, extra_bed,assigned) "
+				 			+ "VALUES(DEFAULT,"
+				 			+ rooms.get(i).getHotel() + ","
+				 			+ "'" + checkin + "',"
+				 			+ "'" + checkout + "',"
+				 			+ "'" + rooms.get(i).getSize() + "',"
+				 			+ Integer.valueOf(pin) + ","
+				 			+ "'"+ url + "',"
+				 			+ extrabeds +","
+				 			+ "'No')";
+				System.out.println(insert);
+				 			bookingCount += stmnt.executeUpdate(insert);
+				 			
 			}
 			
-			
+			stmnt.close();
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

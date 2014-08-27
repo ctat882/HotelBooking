@@ -61,7 +61,7 @@ public class DiscountServlet extends HttpServlet{
 			session.setAttribute("discountInfo", discountInfo);
 			
 			// Move to Discount.jsp
-			nextPage = "Discount.jsp";
+			nextPage = "/WEB-INF/Discount.jsp";
 		}
 		
 		//  ********************************    Add Start/End Date and Discount amount to discountInfo  *********************************************************

@@ -15,6 +15,22 @@
 		<url-pattern>/HotelOwnerController</url-pattern>
 	</servlet-mapping>
 
+
+ <servlet>
+		<description>
+		</description>
+		<display-name>ReceptionManagerController</display-name>
+		<servlet-name>ReceptionManagerController</servlet-name>
+		<servlet-class>
+		edu.unsw.comp9321.logic.ReceptionManagerController</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReceptionManagerController</servlet-name>
+		<url-pattern>/ReceptionManagerController</url-pattern>
+	</servlet-mapping>
+
+
+
 	<servlet>
 		<description>
 		</description>
@@ -30,7 +46,7 @@
 
 
 	<welcome-file-list>
-		<welcome-file>welcome.jsp</welcome-file>
+		<welcome-file>Welcome.jsp</welcome-file>
 	</welcome-file-list>
 
 

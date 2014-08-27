@@ -223,7 +223,17 @@ INSERT INTO Rooms VALUES (42,5,'Suite',300.00,'Available');
 
 
 -- Bookings
-INSERT INTO BOOKINGS(hotel, check_in, check_out, size, quantity, pin, url, extra_bed) VALUES (1,'2014-05-01','2014-05-14','Single',2,1000,'someurl',0);
+INSERT INTO BOOKINGS(booking_id,hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(booking_id,hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(booking_id,hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+INSERT INTO BOOKINGS(booking_id,hotel, check_in, check_out, size, pin, url, extra_bed,assigned) VALUES (DEFAULT,1,'2015-05-01','2015-05-14','Twin',1234,'someurl',0,'No');
+
 
 
 INSERT INTO DISCOUNTS(DISCOUNTS.DISCOUNT_ID,DISCOUNTS.HOTEL,DISCOUNTS.ROOM_TYPE,DISCOUNTS.START_DATE,DISCOUNTS.END_DATE,DISCOUNTS.DISCOUNT) 

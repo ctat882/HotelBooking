@@ -63,7 +63,7 @@ public class ReceptionManagerController extends HttpServlet{
 			// Set hotelLoc attribute
 			request.setAttribute("hotelLoc", hotelLoc);
 			// Move to Authorization Page
-			forwardPage = "ReceptionManagerAuth.jsp";	
+			forwardPage = "/WEB-INF/ReceptionManagerAuth.jsp";	
 		}
 		else if (action.equals("Login")){
 			
@@ -101,10 +101,10 @@ public class ReceptionManagerController extends HttpServlet{
 				 session.setAttribute("hotelLocation", hotelLoc);				 
 				 session.setAttribute("userHotelId", user.getUserHotelId(username));
 				 
-				 forwardPage = "ReceptionManagerWelcome.jsp";
+				 forwardPage = "/WEB-INF/ReceptionManagerWelcome.jsp";
 			} 
 			else{
-				 forwardPage = "AuthenticationFailed.jsp";
+				 forwardPage = "/WEB-INF/AuthenticationFailed.jsp";
 			}
 		}
 		else if (action.equals("Assign Booking")){
@@ -130,7 +130,7 @@ public class ReceptionManagerController extends HttpServlet{
 			session.setAttribute("checkOutDate", checkOutDate);
 			session.setAttribute("roomType", roomType);
 			
-			forwardPage = "AssignBooking.jsp"; 
+			forwardPage = "/WEB-INF/AssignBooking.jsp"; 
 			
 		}
 		else if (action.equals("Confirm Booking") || action.equals("Unassign Booking")){

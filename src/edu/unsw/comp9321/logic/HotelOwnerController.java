@@ -65,7 +65,7 @@ public class HotelOwnerController extends HttpServlet{
 			request.setAttribute("hotelOccupancy", hotelOwner.getRooms());
 			request.setAttribute("noHotels", hotelOwner.getTotalHotels());
 			request.setAttribute("hotelLoc", hotelOwner.getHotelLocList());			
-			forwardPage = "HotelOwnerWelcome.jsp";	
+			forwardPage = "/WEB-INF/HotelOwnerWelcome.jsp";	
 			
 		}
 		// Initially select which hotels/rooms to apply discount to
@@ -79,12 +79,12 @@ public class HotelOwnerController extends HttpServlet{
 			
 			if (discountError.equals("true")){
 				session.setAttribute("discountAdded", "false");
-				forwardPage = "DiscountEnd.jsp";
+				forwardPage = "/WEB-INF/DiscountEnd.jsp";
 				
 			}
 			else if (discountError.equals("false")){
 				session.setAttribute("discountAdded", "true");
-				forwardPage = "Confirm.jsp";				
+				forwardPage = "/WEB-INF/Confirm.jsp";				
 			}
 			
 			
@@ -105,7 +105,7 @@ public class HotelOwnerController extends HttpServlet{
 				session.setAttribute("discountAdded", "true");
 			}
 				
-			forwardPage = "DiscountEnd.jsp";
+			forwardPage = "/WEB-INF/DiscountEnd.jsp";
 			
 		}
 		
